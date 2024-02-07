@@ -16,8 +16,9 @@ string convertDate(string date)
 
 void S1_1(vector<string> dates, vector<double> prices, int n, int x)
 {
-    vector<int> changes(prices.size(), 0), buy_sell(prices.size(), 0);
-    for (int i = 1; i < prices.size(); i++)
+    int sz = prices.size();
+    vector<int> changes(sz, 0), buy_sell(sz, 0);
+    for (int i = 1; i < sz; i++)
     {
         if (prices[i] > prices[i - 1])
             changes[i] = changes[i - 1] + 1;
@@ -31,7 +32,7 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
     double final_amt = 0;
 
     // Clarify what last n days really means
-    for (int i = n + 1; i < prices.size(); i++)
+    for (int i = n + 1; i < sz; i++)
     {
         if (changes[i - 1] - changes[i - 1 - n] == n && portfolio < x)
         {
@@ -43,7 +44,6 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
             portfolio--;
             buy_sell[i] = +1;
         }
-
         final_amt += buy_sell[i] * prices[i];
     }
 
@@ -52,8 +52,8 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
     file_1 << "date,cashflow\n";
     file_2 << "date,order_direction,quantity,price\n";
 
-    // Square off kab karna hai ? after endate or on endate currently on enddate
-    for (int i = 0; i < dates.size()- 1; i++)
+    // Square off kab karna hai ? after enddate or on enddate currently on enddate
+    for (int i = 0; i < sz- 1; i++)
     {
         file_1 << dates[i] << "," << prices[i] * buy_sell[i] << "\n";
         if (buy_sell[i] != 0)
@@ -61,11 +61,11 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
     }
 
     //Squaring off 
-    file_1 << dates[dates.size()-1] << "," << prices[dates.size()-1] * (buy_sell[dates.size()-1]+portfolio) << "\n";
-    if ((buy_sell[dates.size()-1] + portfolio) != 0)
-        file_2 << dates[dates.size()-1] << "," << ((buy_sell[dates.size()-1]+ portfolio) < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[dates.size()-1] + portfolio) << "," << prices[dates.size()-1] << "\n";
+    file_1 << dates[sz-1] << "," << prices[sz-1] * (buy_sell[sz-1]+portfolio) << "\n";
+    if ((buy_sell[sz-1] + portfolio) != 0)
+        file_2 << dates[sz-1] << "," << ((buy_sell[sz-1]+ portfolio) < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[sz-1] + portfolio) << "," << prices[sz-1] << "\n";
 
-    final_amt += portfolio*prices[dates.size()-1];
+    final_amt += portfolio*prices[sz-1];
     pnl << final_amt << "\n";
 
     file_1.close();
@@ -75,11 +75,6 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
 
 int main(int argc, char *argv[])
 {
-    // Less arguments
-    //  if (argc < 2) {
-    //      std::cerr << "Usage: " << argv[0] << " <argument>\n";
-    //      return 1;
-    //  }
     string strategy = argv[1];
     int n = stoi(argv[2]);
     int x = stoi(argv[3]);
@@ -101,7 +96,7 @@ int main(int argc, char *argv[])
         getline(ss, field, ',');
         // Get the date
         getline(ss, date, ',');
-        dates.push_back(convertDate(date));
+        dates.push_back(date);
         // Get the price
         if (getline(ss, field, ','))
         {
