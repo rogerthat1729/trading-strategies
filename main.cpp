@@ -6,14 +6,6 @@
 // #include <ifstream>
 using namespace std;
 
-string convertDate(string date)
-{
-    string year = date.substr(0, 4);
-    string month = date.substr(5, 2);
-    string day = date.substr(8, 2);
-    return day + "/" + month + "/" + year;
-}
-
 void S1_1(vector<string> dates, vector<double> prices, int n, int x)
 {
     int sz = prices.size();
@@ -32,14 +24,14 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
     double final_amt = 0;
 
     // Clarify what last n days really means
-    for (int i = n + 1; i < sz; i++)
+    for (int i = n; i < sz; i++)
     {
-        if (changes[i - 1] - changes[i - 1 - n] == n && portfolio < x)
+        if (changes[i] - changes[i - n] == n && portfolio < x)
         {
             portfolio++;
             buy_sell[i] = -1;
         }
-        else if (changes[i - 1] - changes[i - 1 - n] == -n && portfolio > -x)
+        else if (changes[i] - changes[i - n] == -n && portfolio > -x)
         {
             portfolio--;
             buy_sell[i] = +1;
@@ -49,23 +41,23 @@ void S1_1(vector<string> dates, vector<double> prices, int n, int x)
 
     ofstream file_1("daily_cashflow.csv"), file_2("order_statistics.csv"), pnl("final_pnl.txt");
 
-    file_1 << "date,cashflow\n";
-    file_2 << "date,order_direction,quantity,price\n";
+    file_1 << "Date,Cashflow\n";
+    file_2 << "Date,Order_dir,Quantity,Price\n";
 
     // Square off kab karna hai ? after enddate or on enddate currently on enddate
-    for (int i = 0; i < sz- 1; i++)
+    for (int i = n; i < sz - 1; i++)
     {
         file_1 << dates[i] << "," << prices[i] * buy_sell[i] << "\n";
         if (buy_sell[i] != 0)
             file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << 1 << "," << prices[i] << "\n";
     }
 
-    //Squaring off 
-    file_1 << dates[sz-1] << "," << prices[sz-1] * (buy_sell[sz-1]+portfolio) << "\n";
-    if ((buy_sell[sz-1] + portfolio) != 0)
-        file_2 << dates[sz-1] << "," << ((buy_sell[sz-1]+ portfolio) < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[sz-1] + portfolio) << "," << prices[sz-1] << "\n";
+    // Squaring off
+    file_1 << dates[sz - 1] << "," << prices[sz - 1] * (buy_sell[sz - 1] + portfolio) << "\n";
+    if ((buy_sell[sz - 1] + portfolio) != 0)
+        file_2 << dates[sz - 1] << "," << ((buy_sell[sz - 1] + portfolio) < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[sz - 1] + portfolio) << "," << prices[sz - 1] << "\n";
 
-    final_amt += portfolio*prices[sz-1];
+    final_amt += portfolio * prices[sz - 1];
     pnl << final_amt << "\n";
 
     file_1.close();

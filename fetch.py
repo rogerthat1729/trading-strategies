@@ -18,7 +18,7 @@ df = df[["DATE", "CLOSE"]]
 df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
 df = df.iloc[::-1].reset_index(drop=True)
 idx_start = df[df["DATE"] == sd].index[0]
-idx_start -= n+1
+idx_start -= n
 idx_start = max(0, idx_start)
 df1 = df.iloc[idx_start:]
 df1.to_csv("data.csv")
