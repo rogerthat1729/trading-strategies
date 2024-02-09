@@ -20,7 +20,7 @@ void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, 
     {
         file_1 << dates[i] << "," << prices[i] * buy_sell[i] << "\n";
         if (buy_sell[i] != 0)
-            file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << 1 << "," << prices[i] << "\n";
+            file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[i]) << "," << prices[i] << "\n";
     }
 
     // Squaring off
@@ -78,78 +78,153 @@ void S1_2(vector<string> dates, vector<db> prices, int n, int x, db p)
     vector<int> buy_sell(sz, 0);
     vector<db> DMA(sz, 0);
     db sum = 0, sum_sq = 0;
-    for(int i = 0 ; i < n ; ++i)
+    for (int i = 0; i < n; ++i)
     {
         sum += prices[i];
         sum_sq += prices[i] * prices[i];
     }
     sum /= n;
     sum_sq /= n;
-    DMA[n-1] = sum;
+    DMA[n - 1] = sum;
     for (int i = n; i < sz; i++)
     {
-        DMA[i] = DMA[i - 1] + (prices[i] - prices[i - n]) / n;
-        sum_sq += (prices[i] * prices[i] - prices[i - n] * prices[i - n])/n;
-        db sigma = sqrt(sum_sq - DMA[i] * DMA[i]);
-        if (prices[i] > DMA[i] + p * sigma && portfolio < x)
+        db sigma = sqrt(sum_sq - DMA[i - 1] * DMA[i - 1]);
+        if (prices[i] > DMA[i - 1] + p * sigma && portfolio < x)
         {
             portfolio++;
             buy_sell[i] = -1;
         }
-        else if (prices[i] < DMA[i] - p * sigma && portfolio > -x)
+        else if (prices[i] < DMA[i - 1] - p * sigma && portfolio > -x)
         {
             portfolio--;
             buy_sell[i] = 1;
         }
         final_amt += buy_sell[i] * prices[i];
+        DMA[i] = DMA[i - 1] + (prices[i] - prices[i - n]) / n;
+        sum_sq += (prices[i] * prices[i] - prices[i - n] * prices[i - n]) / n;
     }
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
+db updateSF(db SF, db ER, db c1, db c2)
+{
+    return SF + c1 * ((((2 * ER) / (1 + c2) - 1) / ((2 * ER) / (1 + c2) + 1)) - SF);
+}
+
 void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, db c1, db c2)
 {
-    int sz = dates.size(), portfolio = 0, max_hold_days = 0;
-    db final_amt = 0;
+    int sz = dates.size(), portfolio = 0, max_hold_days = 0, running_days = 0, earliest_index = 1e9;
     vector<int> buy_sell(sz, 0);
-    vector<db> DMA(sz, 0);
-    db sum = 0, sum_sq = 0;
-    for(int i = 0 ; i < n ; ++i)
-    {
-        sum += prices[i];
-        sum_sq += prices[i] * prices[i];
-    }
-    sum /= n;
-    sum_sq /= n;
-    DMA[n-1] = sum;
+    db running_denom = 0, SF = 0.5, AMA = prices[n], ER, final_amt = 0;
+    queue<int> bought, sold;
+
+    // update runningdenom
+    for (int i = 0; i < n; i++)
+        running_denom += abs(prices[i] - prices[i + 1]);
+        
     for (int i = n; i < sz; i++)
     {
-        DMA[i] = DMA[i - 1] + (prices[i] - prices[i - n]) / n;
-        sum_sq += (prices[i] * prices[i] - prices[i - n] * prices[i - n])/n;
-        db sigma = sqrt(sum_sq - DMA[i] * DMA[i]);
-        if (prices[i] > DMA[i] + p * sigma && portfolio < x)
+        //Check if no of trades in a day can be > 1 - basically follow AUTOGRADER CONDITIONS !!!!
+        
+        // Reason for implementing stop loss before AMA condition:
+        // Edge case - You are at the boundary position +x, and the price is increasing. 
+        // You won't be able to buy directly using AMA condition, but you can sell using stop loss condition and then buy using AMA condition
+        // Also, since AMA condition does not take into account the buy and sell history, there is no specific need of order of implementation
+        
+        // check for max holding days
+        if(earliest_index != 1e9 && i - earliest_index >= mhd)
         {
+            //Verify condition when both stop loss and AMA are applicable - to do nothing or to buy then sell etc.
+            
+            //We don't need to worry about the max position check here as it always reduces the magnitude of position
+            //Here, abs(buy_sell[i]) cannot exceed 1
+            //Moreover, since both bought and sold are not non-empty, we only need to check size of either one of them
+            
+            if(bought.size()>0)
+            {
+                bought.pop();
+                if (bought.size() != 0)
+                    earliest_index = bought.front();
+                else
+                    earliest_index = 1e9;
+                portfolio--;
+                buy_sell[i] += 1;
+            }
+            else if(sold.size()>0)
+            {
+                sold.pop();
+                if (sold.size() != 0)
+                    earliest_index = sold.front();
+                else
+                    earliest_index = 1e9;
+                portfolio++;
+                buy_sell[i] -= 1;
+            }
+        }
+        
+        if (prices[i] >= (1 + (p / 100.0)) * AMA && portfolio < x)
+        {
+            if (sold.size() > 0)
+            {
+                int j = sold.front();
+                sold.pop();
+                // We know bought is empty
+                if (sold.size() != 0)
+                    earliest_index = sold.front();
+                else
+                    earliest_index = 1e9;
+            }
+            else
+            {
+                bought.push(i);
+                earliest_index = min(i, earliest_index);
+            }
+            buy_sell[i] -= 1;
             portfolio++;
-            buy_sell[i] = -1;
         }
-        else if (prices[i] < DMA[i] - p * sigma && portfolio > -x)
+        else if (prices[i] <= (1 - (p / 100.0)) * AMA && portfolio > -x)
         {
+            if (bought.size() > 0)
+            {
+                int j = bought.front();
+                bought.pop();
+                // We know sold is empty
+                if (bought.size() != 0)
+                    earliest_index = bought.front();
+                else
+                    earliest_index = 1e9;
+            }
+            else
+            {
+                sold.push(i);
+                earliest_index = min(i, earliest_index);
+            }
+            buy_sell[i] += 1;
             portfolio--;
-            buy_sell[i] = 1;
         }
-        if(buy_sell[i] != 0)
-            max_hold_days = 0;
-        else
-            max_hold_days++;
-        if(max_hold_days >= mhd)
-        {
-            // Change the order_statistics file to reflect value of |buy_sell| > 1
-            buy_sell[i] = portfolio;
-            max_hold_days = 0;
-            portfolio = 0;
-        }
+        
         final_amt += buy_sell[i] * prices[i];
+
+        // update runningdenom
+        if (i < sz - 1)
+        {
+            // Verify the meaning of skip when runningdenom = 0
+            if (running_denom != 0)
+            {
+                ER = (prices[i] - prices[i - n]) / running_denom;
+                SF = updateSF(SF, ER, c1, c2);
+                AMA += SF * (prices[i] - AMA);
+            }
+            running_denom -= abs(prices[i - n] - prices[i - n + 1]);
+            running_denom += abs(prices[i] - prices[i + 1]);
+        }
     }
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
+}
+
+void S1_4_1(vector<string> dates, vector<db> prices, int x)
+{
+    
 }
 
 int main(int argc, char *argv[])
@@ -161,7 +236,7 @@ int main(int argc, char *argv[])
     int mhd = stoi(argv[5]);
     db c1 = stod(argv[6]);
     db c2 = stod(argv[7]);
-    
+
     ifstream file("data.csv");
     string line;
 
@@ -191,9 +266,11 @@ int main(int argc, char *argv[])
     file.close();
     if (strategy == "BASIC")
         S1_1(dates, prices, n, x);
-    else if(strategy == "DMA")
+    else if (strategy == "DMA")
         S1_2(dates, prices, n, x, p);
-    else if(strategy == "DMA++")
+    else if (strategy == "DMA++")
         S1_3(dates, prices, n, x, p, mhd, c1, c2);
+    else if(strategy == "MACD")
+        S1_4_1(dates, prices, x);
     return 0;
 }
