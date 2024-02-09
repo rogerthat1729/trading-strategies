@@ -1,6 +1,6 @@
 .PHONY: all DMA DMA++ MACD RSI ADX LINEAR_REGRESSION BASIC PAIRS PAIRS_WITH_STOP_LOSS
 
-all: $(strategy)
+all: clean
 
 SYMBOL	?=	"SBIN"
 strategy ?= "BASIC"
@@ -22,7 +22,7 @@ symbol2 ?= "ADANIENT"
 threshold ?= 2
 stop_loss_threshold ?= 4
 
-clean:
+clean: $(strategy)
 	rm -f main
 	rm -f data.csv
 
