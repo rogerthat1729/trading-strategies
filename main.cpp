@@ -121,26 +121,26 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
     // update runningdenom
     for (int i = 0; i < n; i++)
         running_denom += abs(prices[i] - prices[i + 1]);
-        
+
     for (int i = n; i < sz; i++)
     {
-        //Check if no of trades in a day can be > 1 - basically follow AUTOGRADER CONDITIONS !!!!
-        
+        // Check if no of trades in a day can be > 1 - basically follow AUTOGRADER CONDITIONS !!!!
+
         // Reason for implementing stop loss before AMA condition:
-        // Edge case - You are at the boundary position +x, and the price is increasing. 
+        // Edge case - You are at the boundary position +x, and the price is increasing.
         // You won't be able to buy directly using AMA condition, but you can sell using stop loss condition and then buy using AMA condition
         // Also, since AMA condition does not take into account the buy and sell history, there is no specific need of order of implementation
-        
+
         // check for max holding days
-        if(earliest_index != 1e9 && i - earliest_index >= mhd)
+        if (earliest_index != 1e9 && i - earliest_index >= mhd)
         {
-            //Verify condition when both stop loss and AMA are applicable - to do nothing or to buy then sell etc.
-            
-            //We don't need to worry about the max position check here as it always reduces the magnitude of position
-            //Here, abs(buy_sell[i]) cannot exceed 1
-            //Moreover, since both bought and sold are not non-empty, we only need to check size of either one of them
-            
-            if(bought.size()>0)
+            // Verify condition when both stop loss and AMA are applicable - to do nothing or to buy then sell etc.
+
+            // We don't need to worry about the max position check here as it always reduces the magnitude of position
+            // Here, abs(buy_sell[i]) cannot exceed 1
+            // Moreover, since both bought and sold are not non-empty, we only need to check size of either one of them
+
+            if (bought.size() > 0)
             {
                 bought.pop();
                 if (bought.size() != 0)
@@ -150,7 +150,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
                 portfolio--;
                 buy_sell[i] += 1;
             }
-            else if(sold.size()>0)
+            else if (sold.size() > 0)
             {
                 sold.pop();
                 if (sold.size() != 0)
@@ -161,7 +161,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
                 buy_sell[i] -= 1;
             }
         }
-        
+
         if (prices[i] >= (1 + (p / 100.0)) * AMA && portfolio < x)
         {
             if (sold.size() > 0)
@@ -202,7 +202,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             buy_sell[i] += 1;
             portfolio--;
         }
-        
+
         final_amt += buy_sell[i] * prices[i];
 
         // update runningdenom
@@ -222,9 +222,41 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_1(vector<string> dates, vector<db> prices, int x)
+void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
 {
-    
+    int sz = dates.size(), portfolio = 0;
+    vector<int> buy_sell(sz, 0);
+    db shortEWM = prices[n], longEWM = prices[n], MACD = 0, signal = 0, final_amt = 0;
+    db shortalpha = 2.0 / 13.0, longalpha = 2.0 / 27.0, MACDalpha = 2.0 / 10.0;
+    for (int i = n; i < sz; ++i)
+    {
+        if (MACD > signal && portfolio < x)
+        {
+            portfolio++;
+            buy_sell[i] = -1;
+        }
+        else if (MACD < signal && portfolio > -x)
+        {
+            portfolio--;
+            buy_sell[i] = 1;
+        }
+
+        shortEWM += shortalpha * (prices[i] - shortEWM);
+        longEWM += longalpha * (prices[i] - longEWM);
+        MACD = shortEWM - longEWM;
+        signal += MACDalpha * (MACD - signal);
+
+        final_amt += buy_sell[i] * prices[i];
+    }
+    make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
+}
+
+void S1_4_2(vector<string> dates, vector<db> prices, int n, int x)
+{
+    int sz = dates.size(), portfolio = 0;
+    db final_amt = 0;
+    vector<int> buy_sell(sz, 0);
+    make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
 int main(int argc, char *argv[])
@@ -270,7 +302,7 @@ int main(int argc, char *argv[])
         S1_2(dates, prices, n, x, p);
     else if (strategy == "DMA++")
         S1_3(dates, prices, n, x, p, mhd, c1, c2);
-    else if(strategy == "MACD")
-        S1_4_1(dates, prices, x);
+    else if (strategy == "MACD")
+        S1_4_1(dates, prices, n, x);
     return 0;
 }
