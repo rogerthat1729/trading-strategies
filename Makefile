@@ -26,31 +26,28 @@ clean: $(strategy)
 	rm -f main
 	rm -f data.csv
 
-
 BASIC:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(n) $(x) $(start_date) $(end_date)
-	make clean
 	
 DMA:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(n) $(x) $(p) $(start_date) $(end_date)
 
 DMA++:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(x) $(p) $(n) $(max_hold_days) $(c1) $(c2) $(start_date) $(end_date)
 
 MACD:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) 0
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) 0 
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) 0 $(x) $(start_date) $(end_date) 
-	make clean
 
 RSI:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(x) $(n) $(oversold_threshold) $(overbought_threshold) $(start_date) $(end_date)
 
@@ -60,18 +57,18 @@ ADX:
 	./main $(strategy) $(n) $(x) $(adx_threshold) $(start_date) $(end_date)
 
 LINEAR_REGRESSION:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) 1
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(x) $(p) $(train_start_date) $(train_end_date) $(start_date) $(end_date)
 
 PAIRS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n) 1
+	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n) 1
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(start_date) $(end_date)
 
 PAIRS_WITH_STOP_LOSS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n) 1
+	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n) 1
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(stop_loss_threshold) $(start_date) $(end_date)

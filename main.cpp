@@ -7,6 +7,10 @@
 using namespace std;
 #define db double
 
+//Make cashflow cumulative
+//Complete S1_4_3
+//Match outputs in all cases
+
 void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, db final_amt, int n)
 {
     int sz = prices.size();
@@ -22,11 +26,6 @@ void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, 
         if (buy_sell[i] != 0)
             file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[i]) << "," << prices[i] << "\n";
     }
-
-    // Squaring off
-    // file_1 << dates[sz - 1] << "," << prices[sz - 1] * (buy_sell[sz - 1] + portfolio) << "\n";
-    // if ((buy_sell[sz - 1] + portfolio) != 0)
-    //     file_2 << dates[sz - 1] << "," << ((buy_sell[sz - 1] + portfolio) < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[sz - 1] + portfolio) << "," << prices[sz - 1] << "\n";
 
     final_amt += portfolio * prices[sz - 1];
     pnl << final_amt << "\n";
@@ -294,11 +293,21 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_3(vector<string> dates, vector<db> prices, int n, int x, int adx_threshold)
+void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, int n, int x, int adx_threshold)
 {
     int sz = dates.size(), portfolio = 0;
-    db final_amt = 0;
     vector<int> buy_sell(sz, 0);
+    db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prevClosePrices[n]), abs(lowPrices[n] - prevClosePrices[n])));
+    db final_amt = 0, ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), DIplus = 0, DIminus = 0, DX = 0, ADX = 0, alpha = 2.0 / (n + 1);
+
+    for (int i = n; i < sz; i++)
+    {
+        if (i < sz - 1)
+        {
+            TR = max(highPrices[i+1] - lowPrices[i+1], max(abs(highPrices[i+1] - prevClosePrices[i+1]), abs(lowPrices[i+1] - prevClosePrices[i+1])));
+            ATR += alpha * (TR - ATR);
+        }
+    }
 }
 
 int main(int argc, char *argv[])
@@ -310,26 +319,45 @@ int main(int argc, char *argv[])
     string line;
 
     vector<string> dates;
-    vector<db> prices;
+    vector<db> highPrices, lowPrices, prevClosePrices, prices;
 
-    std::getline(file, line);
+    // Skip the header line
+    getline(file, line);
 
     while (getline(file, line))
     {
         istringstream ss(line);
         string field;
         string date;
-        db price;
-        // remove index
+        
+        //skipping index column
         getline(ss, field, ',');
+
         // Get the date
         getline(ss, date, ',');
         dates.push_back(date);
-        // Get the price
+
+        // Get the high price
         if (getline(ss, field, ','))
         {
-            price = stod(field);
-            prices.push_back(price);
+            highPrices.push_back(stod(field));
+        }
+
+        // Get the low price
+        if (getline(ss, field, ','))
+        {
+            lowPrices.push_back(stod(field));
+        }
+
+        // Get the previous close price
+        if (getline(ss, field, ','))
+        {
+            prevClosePrices.push_back(stod(field));
+        }
+
+        if (getline(ss, field))
+        {
+            prices.push_back(stod(field));
         }
     }
     file.close();
@@ -376,7 +404,7 @@ int main(int argc, char *argv[])
         int n = stoi(argv[2]);
         int x = stoi(argv[3]);
         int adx_threshold = stoi(argv[4]);
-        S1_4_3(dates, prices, n, x, adx_threshold);
+        S1_4_3(dates, highPrices, lowPrices, prevClosePrices, n, x, adx_threshold);
     }
     return 0;
 }

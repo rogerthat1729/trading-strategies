@@ -14,7 +14,7 @@ end_date = datetime.strptime(ed, "%d/%m/%Y").date()
 csv_start_date = start_date - relativedelta(days = n+7)
 
 df = stock_df(symbol=sym, from_date=csv_start_date,to_date=end_date, series="EQ")
-df = df[["DATE", "CLOSE"]]
+df = df[["DATE", "HIGH", "LOW", "PREV. CLOSE", "CLOSE"]]
 df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
 df = df.iloc[::-1].reset_index(drop=True)
 idx_start = df[df["DATE"] == sd].index[0]
