@@ -251,23 +251,71 @@ void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_2(vector<string> dates, vector<db> prices, int n, int x)
+void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought, db oversold)
 {
     int sz = dates.size(), portfolio = 0;
     db final_amt = 0;
     vector<int> buy_sell(sz, 0);
+
+    db avgGain = 0, avgLoss = 0, RS, RSI;
+
+    for (int i = 1; i < n; i++)
+    {
+        if (prices[i] > prices[i - 1])
+            avgGain += prices[i] - prices[i - 1];
+        else
+            avgLoss += prices[i - 1] - prices[i];
+    }
+    avgGain /= n;
+    avgLoss /= n;
+    RS = avgGain / avgLoss;
+    RSI = 100 - (100 / (1 + RS));
+
+    for (int i = n; i < sz; i++)
+    {
+        if (RSI > overbought && portfolio > -x)
+        {
+            portfolio--;
+            buy_sell[i] = 1;
+        }
+        else if (RSI < oversold && portfolio < x)
+        {
+            portfolio++;
+            buy_sell[i] = -1;
+        }
+
+        final_amt += buy_sell[i] * prices[i];
+
+        if (prices[i] > prices[i - 1])
+        {
+            avgGain = (avgGain * (n - 1) + prices[i] - prices[i - 1]) / n;
+            avgLoss = (avgLoss * (n - 1)) / n;
+        }
+        else
+        {
+            avgLoss = (avgLoss * (n - 1) + prices[i - 1] - prices[i]) / n;
+            avgGain = (avgGain * (n - 1)) / n;
+        }
+        RS = avgGain / avgLoss;
+        RSI = 100 - (100 / (1 + RS));
+    }
+
+
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
+}
+
+
+void S1_4_3(vector<string> dates, vector<db> prices, int n, int x, int adx_threshold)
+{
+    int sz = dates.size(), portfolio = 0;
+    db final_amt = 0;
+    vector<int> buy_sell(sz, 0);
 }
 
 int main(int argc, char *argv[])
 {
     string strategy = argv[1];
-    int n = stoi(argv[2]);
-    int x = stoi(argv[3]);
-    db p = stod(argv[4]);
-    int mhd = stoi(argv[5]);
-    db c1 = stod(argv[6]);
-    db c2 = stod(argv[7]);
+    cout << strategy << endl;
 
     ifstream file("data.csv");
     string line;
@@ -296,13 +344,53 @@ int main(int argc, char *argv[])
         }
     }
     file.close();
-    if (strategy == "BASIC")
+
+    /*db p = stod(argv[4]);
+    int mhd = stoi(argv[5]);
+    db c1 = stod(argv[6]);
+    db c2 = stod(argv[7]);
+    db overbought = stod(argv[8]);
+    db oversold = stod(argv[9]);*/
+
+    if (strategy == "BASIC"){
+        int n = stoi(argv[2]);
+        int x = stoi(argv[3]);
         S1_1(dates, prices, n, x);
-    else if (strategy == "DMA")
+    }
+    else if (strategy == "DMA"){
+        int n = stoi(argv[2]);
+        int x = stoi(argv[3]);
+        int p = stoi(argv[4]);
         S1_2(dates, prices, n, x, p);
-    else if (strategy == "DMA++")
+    }
+    else if (strategy == "DMA++"){
+        int n = stoi(argv[2]);
+        int x = stoi(argv[3]);
+        int p = stoi(argv[4]);
+        int mhd = stoi(argv[5]);
+        db c1 = stod(argv[6]);
+        db c2 = stod(argv[7]);
         S1_3(dates, prices, n, x, p, mhd, c1, c2);
-    else if (strategy == "MACD")
+    }
+    else if (strategy == "MACD"){
+        int n = stoi(argv[2]);
+        int x = stoi(argv[3]);
+
         S1_4_1(dates, prices, n, x);
+    }
+    else if (strategy == "RSI"){
+        int x = stoi(argv[2]);
+        int n = stoi(argv[3]);
+        db overbought = stod(argv[4]);
+        db oversold = stod(argv[5]);
+        S1_4_2(dates, prices, n, x, overbought, oversold);
+    }
+    else if (strategy == "ADX"){
+        int n = stoi(argv[2]);
+        int x = stoi(argv[3]);
+        int adx_threshold = stoi(argv[4]);
+        S1_4_3(dates, prices, n, x, adx_threshold);
+
+    }
     return 0;
 }
