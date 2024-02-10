@@ -8,7 +8,6 @@ using namespace std;
 #define db double
 
 // Remove cashflow floating point error
-// Complete S1_4_3
 // Match outputs in all cases
 
 void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n)
@@ -27,8 +26,7 @@ void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, 
             file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[i]) << "," << prices[i] << "\n";
     }
 
-    final_amt.back() += portfolio * prices[sz - 1];
-    pnl << final_amt.back() << "\n";
+    pnl << final_amt.back() + portfolio * prices[sz - 1] << "\n";
 
     file_1.close();
     file_2.close();
@@ -297,18 +295,33 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
 
 void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, int adx_threshold)
 {
+    //In buy_sell, -1 means buy, 1 means sell
     int sz = dates.size(), portfolio = 0;
     vector<int> buy_sell(sz, 0);
     vector<db> final_amt(sz, 0);
     db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prevClosePrices[n]), abs(lowPrices[n] - prevClosePrices[n])));
-    db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), DIplus = 0, DIminus = 0, DX = 0, ADX = 0, alpha = 2.0 / (n + 1);
-
+    db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), DIplus = DMplus/ATR, DIminus = DMminus/ATR, DX = (DIplus - DIminus)/(DIplus + DIminus), ADX = DX, alpha = 2.0 / (n + 1);
+    //handle cases when any of the values in denom become 0
     for (int i = n; i < sz; i++)
     {
+        if (ADX > adx_threshold && portfolio < x)
+        {
+            portfolio++;
+            buy_sell[i] = -1;
+        }
+        else if (ADX < adx_threshold && portfolio > -x)
+        {
+            portfolio--;
+            buy_sell[i] = 1;
+        }
         if (i < sz - 1)
         {
             TR = max(highPrices[i + 1] - lowPrices[i + 1], max(abs(highPrices[i + 1] - prevClosePrices[i + 1]), abs(lowPrices[i + 1] - prevClosePrices[i + 1])));
             ATR += alpha * (TR - ATR);
+            DIplus += alpha * (DMplus/ATR - DIplus);
+            DIminus += alpha * (DMminus/ATR - DIminus);
+            DX = (DIplus - DIminus)/(DIplus + DIminus);
+            ADX += alpha * (DX - ADX);
         }
         final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
     }
