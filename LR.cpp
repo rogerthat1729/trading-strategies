@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 
     int sz = dates.size() - 1;
     vector<vector<db>> X(sz);
-    vector<db> Y(sz);
+    vector<db> Y1(sz);
     for (int i = 0; i < sz; i++)
     {
         X[i].push_back(1);
@@ -250,8 +250,10 @@ int main(int argc, char *argv[])
         X[i].push_back(highPrices[i]);
         X[i].push_back(noOfTrades[i]);
         X[i].push_back(openPrices[i + 1]);
-        Y.push_back(closePrices[i + 1]);
+        Y1.push_back(closePrices[i + 1]);
     }
-    
+    vector<vector<db>> Y = {Y1};
+    vector<vector<db>> theta = matrixMultiply(matrixMultiply(matrixInverse(matrixMultiply(matrixTranspose(X), X)), matrixTranspose(X)), Y);
+    printMat(theta);
     return 0;
 }
