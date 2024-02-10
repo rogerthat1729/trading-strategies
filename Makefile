@@ -23,7 +23,7 @@ threshold ?= 2
 stop_loss_threshold ?= 4
 
 clean: $(strategy)
-	rm -f data.csv
+	 rm -f data.csv
 
 BASIC:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
