@@ -64,7 +64,7 @@ ADX:
 LINEAR_REGRESSION:
 	python3 fetchLR.py $(SYMBOL) $(train_start_date) $(train_end_date) $(start_date) $(end_date) 
 	g++ -std=c++20 -o LR LR.cpp
-	./LR $(x) $(p) $(train_start_date) $(train_end_date)
+	./LR $(x) $(p) $(train_start_date) $(train_end_date) $(start_date) $(end_date)
 	rm -f LR
 	rm -f traindata.csv
 	rm -f testdata.csv

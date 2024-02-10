@@ -331,6 +331,8 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
+
+
 int main(int argc, char *argv[])
 {
     string strategy = argv[1];

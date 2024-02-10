@@ -120,21 +120,24 @@ vector<vector<db>> matrixTranspose(vector<vector<db>> X)
 vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
 {
     int n = X1.size(), m = X1[0].size();
-    vector<vector<db>> prod(X1.size(), vector<db>(X2[0].size(), 0));
-    if(m == X2.size())
-    {
-        for(int i = 0 ; i < n ; ++i)
-        {
-            for(int j = 0 ; j < m ; ++j)
-            {
-                for(int k = 0 ; k < m ; ++k)
-                {
-                    prod[i][j] += X1[i][k] * X2[k][j];
-                }
-            }
-        }
-    }
-    return prod;
+    cout << n << ' ' << m << endl;
+    // cout << X2[0].size() << ' ' << m << endl;
+    // vector<vector<db>> prod(X1.size());
+    // cout << "here" << endl;
+    // if(m == X2.size())
+    // {
+    //     for(int i = 0 ; i < n ; ++i)
+    //     {
+    //         for(int j = 0 ; j < m ; ++j)
+    //         {
+    //             for(int k = 0 ; k < m ; ++k)
+    //             {
+    //                 prod[i][j] += X1[i][k] * X2[k][j];
+    //             }
+    //         }
+    //     }
+    // }
+    return {{}};
 }
 
 vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
@@ -196,9 +199,8 @@ vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
     return inverse;
 }
 
-
-int main(int argc, char *argv[])
-{
+vector<vector<db>> trainmodel(){
+    // Training the model using the training data
     ifstream file("traindata.csv");
     string line;
 
@@ -237,6 +239,7 @@ int main(int argc, char *argv[])
             noOfTrades.push_back(stoi(field));
     }
 
+    file.close();
     int sz = dates.size() - 1;
     vector<vector<db>> X(sz);
     vector<vector<db>> Y;
@@ -257,6 +260,123 @@ int main(int argc, char *argv[])
     //printMat(Y);
     //printMat(matrixTranspose(X));
     vector<vector<db>> theta = matrixMultiply(matrixMultiply(matrixInverse(matrixMultiply(matrixTranspose(X), X)), matrixTranspose(X)), Y);
-    printMat(theta);
+    return theta;
+}
+
+void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n)
+{
+    int sz = prices.size();
+    ofstream file_1("daily_cashflow.csv"), file_2("order_statistics.csv"), pnl("final_pnl.txt");
+
+    file_1 << "Date,Cashflow\n";
+    file_2 << "Date,Order_dir,Quantity,Price\n";
+
+    // Square off kab karna hai ? after enddate or on enddate currently on enddate
+    for (int i = n; i < sz; i++)
+    {
+        file_1 << dates[i] << "," << final_amt[i] << "\n";
+        if (buy_sell[i] != 0)
+            file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[i]) << "," << prices[i] << "\n";
+    }
+
+    pnl << final_amt.back() + portfolio * prices[sz - 1] << "\n";
+
+    file_1.close();
+    file_2.close();
+    pnl.close();
+}
+
+void doLR(vector<string> dates, vector<db> prices,db p, int x, vector<db> yy){
+    
+    dates.erase(dates.begin());
+    prices.erase(prices.begin());
+    
+    int sz = dates.size();
+    vector<int> buy_sell(sz, 0);
+    vector<db> final_amt(sz, 0);
+    
+    int portfolio = 0;
+    for (int i = 0; i < sz; i++)
+    {
+        if (yy[i] > prices[i]*(1 + p/100.0) && portfolio < x)
+        {
+            buy_sell[i] = -1;
+            portfolio += 1;
+        }
+        else if (yy[i] < prices[i]*(1 - p/100.0) && portfolio > -x)
+        {
+            buy_sell[i] = 1;
+            portfolio -= 1;
+        }
+        final_amt[i] = buy_sell[i] * prices[i];
+    }
+    
+    make_csv(dates, prices, buy_sell, portfolio, final_amt, 0);
+}
+
+int main(int argc, char *argv[])
+{   
+    //getting the arguments
+    int x = stoi(argv[1]);
+    db p = stod(argv[2]);
+
+    vector<vector<db>> theta = trainmodel();
+
+    // Model has been trained now and we have the theta values. 
+    // Now we can use these theta values to predict the stock prices for the next n days.
+
+    ifstream file("testdata.csv");
+    string line;
+
+    vector<string> dates;
+    vector<db> highPrices;
+    vector<db> lowPrices;
+    vector<db> prevClosePrices;
+    vector<db> openPrices;
+    vector<db> closePrices;
+    vector<db> vwap;
+    vector<int> noOfTrades;
+
+    // skip header
+    getline(file, line);
+
+    while (getline(file, line))
+    {
+        stringstream ss(line);
+        string date, field;
+        getline(ss, field, ',');
+        if (getline(ss, date, ','))
+            dates.push_back(date);
+        if (getline(ss, field, ','))
+            highPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            lowPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            prevClosePrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            closePrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            openPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            vwap.push_back(stod(field));
+        if (getline(ss, field))
+            noOfTrades.push_back(stoi(field));
+    }
+    file.close();
+    int sz = dates.size() - 1;
+    vector<vector<db>> X(sz, vector<db>(0));
+    cout << "trained model" << endl;
+    for (int i = 0; i < sz; i++)
+    {
+        X[i].push_back(1);
+        X[i].push_back(closePrices[i]);
+        X[i].push_back(openPrices[i]);
+        X[i].push_back(vwap[i]);
+        X[i].push_back(lowPrices[i]);
+        X[i].push_back(highPrices[i]);
+        X[i].push_back(noOfTrades[i]);
+        X[i].push_back(openPrices[i + 1]);
+        
+    }
     return 0;
 }
