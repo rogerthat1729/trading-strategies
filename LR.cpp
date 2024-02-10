@@ -96,9 +96,9 @@ void printMat(vector<vector<db>> v)
     {
         for(int j = 0 ; j < v[i].size() ; ++j)
         {
-            cout << v[i][j] << " ";
+            std::cout << v[i][j] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
@@ -136,6 +136,66 @@ vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
     }
     return prod;
 }
+
+vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
+    int n = matrix.size();
+    vector<vector<db>> inverse(n, vector<db>(n, 0));
+
+    // Initialize the inverse matrix as an identity matrix
+    for (int i = 0; i < n; i++) {
+        inverse[i][i] = 1.0;
+    }
+
+    // Perform Gaussian elimination
+    for (int i = 0; i < n; i++) {
+        // Find the pivot
+        db maxEl = abs(matrix[i][i]);
+        int maxRow = i;
+        for (int k = i + 1; k < n; k++) {
+            if (abs(matrix[k][i]) > maxEl) {
+                maxEl = abs(matrix[k][i]);
+                maxRow = k;
+            }
+        }
+
+        //Swap maximum row with current row
+        for (int k = i; k < n; k++) {
+            swap(matrix[maxRow][k], matrix[i][k]);
+            swap(inverse[maxRow][k], inverse[i][k]);
+        }
+
+        // Make all rows below this one 0 in current column
+        for (int k = i + 1; k < n; k++) {
+            db c = -matrix[k][i] / matrix[i][i];
+            for (int j = 0; j < n; j++) {
+                 matrix[k][j] += c * matrix[i][j];
+                inverse[k][j] += c * inverse[i][j];
+            }
+        }
+    }
+
+    // Solve equation Ax=b for an upper triangular matrix A
+    for (int i = n - 1; i > 0; i--) {
+        for (int j = i - 1; j >= 0; j--) {
+            db c = -matrix[j][i] / matrix[i][i];
+            for (int k = 0; k < n; k++) {
+                matrix[j][k] += c * matrix[i][k];
+                inverse[j][k] += c * inverse[i][k];
+            }
+        }
+    }
+
+    // Normalize diagonal to 1
+    for (int i = 0; i < n; i++) {
+        db c = 1.0 / matrix[i][i];
+        for (int j = 0; j < n; j++) {
+            matrix[i][j] *= c;
+            inverse[i][j] *= c;
+        }
+    }
+    return inverse;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -192,6 +252,6 @@ int main(int argc, char *argv[])
         X[i].push_back(openPrices[i + 1]);
         Y.push_back(closePrices[i + 1]);
     }
-
+    
     return 0;
 }
