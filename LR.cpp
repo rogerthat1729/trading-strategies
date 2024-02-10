@@ -120,24 +120,22 @@ vector<vector<db>> matrixTranspose(vector<vector<db>> X)
 vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
 {
     int n = X1.size(), m = X1[0].size();
-    cout << n << ' ' << m << endl;
-    // cout << X2[0].size() << ' ' << m << endl;
-    // vector<vector<db>> prod(X1.size());
-    // cout << "here" << endl;
-    // if(m == X2.size())
-    // {
-    //     for(int i = 0 ; i < n ; ++i)
-    //     {
-    //         for(int j = 0 ; j < m ; ++j)
-    //         {
-    //             for(int k = 0 ; k < m ; ++k)
-    //             {
-    //                 prod[i][j] += X1[i][k] * X2[k][j];
-    //             }
-    //         }
-    //     }
-    // }
-    return {{}};
+    int kk = X2[0].size();
+    vector<vector<db>> prod(n, vector<db>(kk, 0));
+    if(m == X2.size())
+    {
+        for(int i = 0 ; i < n ; ++i)
+        {
+            for(int j = 0 ; j < kk ; ++j)
+            {
+                for(int k = 0 ; k < m ; ++k)
+                {
+                    prod[i][j] += X1[i][k] * X2[k][j];
+                }
+            }
+        }
+    }
+    return prod;
 }
 
 vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
@@ -365,7 +363,7 @@ int main(int argc, char *argv[])
     file.close();
     int sz = dates.size() - 1;
     vector<vector<db>> X(sz, vector<db>(0));
-    cout << "trained model" << endl;
+    
     for (int i = 0; i < sz; i++)
     {
         X[i].push_back(1);
@@ -376,7 +374,19 @@ int main(int argc, char *argv[])
         X[i].push_back(highPrices[i]);
         X[i].push_back(noOfTrades[i]);
         X[i].push_back(openPrices[i + 1]);
-        
     }
+
+    cout << X.size() << " " << X[0].size() << endl;
+    cout << theta.size() << " " << theta[0].size() << endl; 
+    vector<vector<db>> Y = matrixMultiply(X, theta);
+
+    vector<db> yy;
+    for (int i = 0; i < sz; i++)
+    {
+        yy.push_back(Y[i][0]);
+    }
+
+    doLR(dates, closePrices, p, x, yy);
+
     return 0;
 }
