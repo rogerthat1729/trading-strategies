@@ -63,7 +63,7 @@ void S1_1(vector<string> &dates, vector<db> &prices, int n, int x)
             portfolio--;
             buy_sell[i] = 1;
         }
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
+        final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
@@ -82,22 +82,25 @@ void S1_2(vector<string> dates, vector<db> prices, int n, int x, db p)
     sum /= n;
     sum_sq /= n;
     DMA[n - 1] = sum;
+
     for (int i = n; i < sz; i++)
     {
-        db sigma = sqrt(sum_sq - DMA[i - 1] * DMA[i - 1]);
-        if (prices[i] > DMA[i - 1] + p * sigma && portfolio < x)
+        // Including current day price as well in past n days
+        DMA[i] = DMA[i - 1] + (prices[i] - prices[i - n]) / n;
+        sum_sq += (prices[i] * prices[i] - prices[i - n] * prices[i - n]) / n;
+        db sigma = sqrt(sum_sq - DMA[i] * DMA[i]);
+        // cout << sigma << endl;
+        if (prices[i] > DMA[i] + p * sigma && portfolio < x)
         {
             portfolio++;
             buy_sell[i] = -1;
         }
-        else if (prices[i] < DMA[i - 1] - p * sigma && portfolio > -x)
+        else if (prices[i] < DMA[i] - p * sigma && portfolio > -x)
         {
             portfolio--;
             buy_sell[i] = 1;
         }
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
-        DMA[i] = DMA[i - 1] + (prices[i] - prices[i - n]) / n;
-        sum_sq += (prices[i] * prices[i] - prices[i - n] * prices[i - n]) / n;
+        final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
@@ -200,7 +203,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             portfolio--;
         }
 
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
+        final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
 
         // update runningdenom
         if (i < sz - 1)
@@ -226,7 +229,7 @@ void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
     vector<db> final_amt(sz, 0);
     db shortEWM = prices[n], longEWM = prices[n], MACD = 0, signal = 0;
     db shortalpha = 2.0 / 13.0, longalpha = 2.0 / 27.0, MACDalpha = 2.0 / 10.0;
-    //Error in cashflow - floating point stuff
+
     for (int i = n; i < sz; ++i)
     {
         if (MACD > signal && portfolio < x)
@@ -245,7 +248,10 @@ void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
         MACD = shortEWM - longEWM;
         signal += MACDalpha * (MACD - signal);
 
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
+        if (abs(final_amt[i - 1]) < 1e-20)
+            final_amt[i] = buy_sell[i] * prices[i];
+        else
+            final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
@@ -256,6 +262,8 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
     vector<int> buy_sell(sz, 0);
     vector<db> final_amt(sz, 0);
 
+    // Checked avgLoss=0 condition
+
     db avgGain = 0, avgLoss = 0, RS, RSI;
 
     for (int i = 1; i <= n; i++)
@@ -265,14 +273,16 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
     }
     avgGain /= n;
     avgLoss /= n;
-    RS = avgGain / avgLoss;
-    RSI = 100 - (100 / (1 + RS));
-
-    for (int i = n; i < sz; i++)
+    if (avgLoss != 0)
     {
         RS = avgGain / avgLoss;
         RSI = 100 - (100 / (1 + RS));
+    }
+    else
+        RSI = 100.0;
 
+    for (int i = n; i < sz; i++)
+    {
         if (RSI > overbought && portfolio > -x)
         {
             portfolio--;
@@ -284,26 +294,44 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
             buy_sell[i] = -1;
         }
 
-        avgGain = (avgGain * (n) + max(prices[i] - prices[i - 1], 0.0) - max(prices[i - n + 1] - prices[i - n], 0.0)) / n;
-        avgLoss = (avgLoss * (n) + max(prices[i - 1] - prices[i], 0.0) - max(prices[i - n] - prices[i - n + 1], 0.0)) / n;
+        avgGain += (max(prices[i] - prices[i - 1], 0.0) - max(prices[i - n + 1] - prices[i - n], 0.0)) / double(n);
+        avgLoss += (max(prices[i - 1] - prices[i], 0.0) - max(prices[i - n] - prices[i - n + 1], 0.0)) / double(n);
+        if (avgLoss != 0)
+        {
+            RS = avgGain / avgLoss;
+            RSI = 100 - (100 / (1 + RS));
+        }
+        else
+            RSI = 100.0;
 
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
+        final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
 
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, int adx_threshold)
+void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, db adx_threshold)
 {
-    //In buy_sell, -1 means buy, 1 means sell
+    // In buy_sell, -1 means buy, 1 means sell
     int sz = dates.size(), portfolio = 0;
     vector<int> buy_sell(sz, 0);
     vector<db> final_amt(sz, 0);
     db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prevClosePrices[n]), abs(lowPrices[n] - prevClosePrices[n])));
 
     // ADX has been set to DX for the start day due to ambiguity in the formula
-    db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), DIplus = DMplus/ATR, DIminus = DMminus/ATR, DX = (DIplus - DIminus)/(DIplus + DIminus), ADX = DX, alpha = 2.0 / (n + 1);
-    //handle cases when any of the values in denom become 0
+    db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), alpha = 2.0 / (n + 1);
+    db DIplus, DIminus, DX, ADX;
+
+    if (ATR != 0)
+        DIplus = DMplus / ATR, DIminus = DMminus / ATR;
+    else
+        DIplus = 0, DIminus = 0;
+
+    if (DIplus + DIminus != 0)
+        DX = (DIplus - DIminus) / (DIplus + DIminus), ADX = DX;
+    else
+        DX = 0, ADX = 0;
+    // handle cases when any of the values in denom become 0
     for (int i = n; i < sz; i++)
     {
         if (ADX > adx_threshold && portfolio < x)
@@ -320,18 +348,15 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
         {
             TR = max(highPrices[i + 1] - lowPrices[i + 1], max(abs(highPrices[i + 1] - prevClosePrices[i + 1]), abs(lowPrices[i + 1] - prevClosePrices[i + 1])));
             ATR += alpha * (TR - ATR);
-            DIplus += alpha * (DMplus/ATR - DIplus);
-            DIminus += alpha * (DMminus/ATR - DIminus);
-            DX = (DIplus - DIminus)/(DIplus + DIminus);
+            DIplus += alpha * (DMplus / ATR - DIplus);
+            DIminus += alpha * (DMminus / ATR - DIminus);
+            DX = (DIplus - DIminus) / (DIplus + DIminus);
             ADX += alpha * (DX - ADX);
         }
-        final_amt[i] = final_amt[i-1] + buy_sell[i] * prices[i];
+        final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
-    
     make_csv(dates, prices, buy_sell, portfolio, final_amt, n);
 }
-
-
 
 int main(int argc, char *argv[])
 {
@@ -417,7 +442,7 @@ int main(int argc, char *argv[])
     }
     else if (strategy == "ADX")
     {
-        int adx_threshold = stoi(argv[4]);
+        db adx_threshold = stod(argv[4]);
         S1_4_3(dates, highPrices, lowPrices, prevClosePrices, prices, n, x, adx_threshold);
     }
     return 0;

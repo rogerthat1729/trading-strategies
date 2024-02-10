@@ -1,85 +1,4 @@
-// Sample code for inverse of matrix
-// For normal linear regression, use eqn theta = (X'X)^-1 * X'Y
 
-// // Function to find the determinant of a matrix
-// double determinant(vector<vector<double>> matrix) {
-//   int n = matrix.size();
-//   double det = 1;
-//   for (int i = 0; i < n; i++) {
-//     for (int j = i + 1; j < n; j++) {
-//       det *= matrix[i][i] / matrix[j][i];
-//       for (int k = i; k < n; k++) {
-//         matrix[j][k] -= matrix[i][k] * det;
-//       }
-//     }
-//   }
-//   for (int i = 0; i < n; i++) {
-//     det *= matrix[i][i];
-//   }
-//   return det;
-// }
-
-// // Function to find the adjoint of a matrix
-// vector<vector<double>> adjoint(vector<vector<double>> matrix) {
-//   int n = matrix.size();
-//   vector<vector<double>> adjoint(n, vector<double>(n));
-//   for (int i = 0; i < n; i++) {
-//     for (int j = 0; j < n; j++) {
-//       adjoint[i][j] = cofactor(matrix, i, j);
-//     }
-//   }
-//   return adjoint;
-// }
-
-// // Function to find the cofactor of a matrix
-// double cofactor(vector<vector<double>> matrix, int i, int j) {
-//   int n = matrix.size();
-//   vector<vector<double>> minor(n - 1, vector<double>(n - 1));
-//   for (int x = 0; x < n - 1; x++) {
-//     for (int y = 0; y < n - 1; y++) {
-//       if (x < i) {
-//         minor[x][y] = matrix[x][y];
-//       } else if (x >= i) {
-//         minor[x][y] = matrix[x + 1][y];
-//       }
-//       if (y < j) {
-//         minor[x][y] = matrix[x][y];
-//       } else if (y >= j) {
-//         minor[x][y] = matrix[x][y + 1];
-//       }
-//     }
-//   }
-//   return pow(-1, i + j) * determinant(minor);
-// }
-
-// // Function to find the inverse of a matrix
-// vector<vector<double>> inverse(vector<vector<double>> matrix) {
-//   double det = determinant(matrix);
-//   if (det == 0) {
-//     cout << "Matrix is not invertible" << endl;
-//     return vector<vector<double>>();
-//   }
-//   vector<vector<double>> adjoint = adjoint(matrix);
-//   for (int i = 0; i < matrix.size(); i++) {
-//     for (int j = 0; j < matrix.size(); j++) {
-//       adjoint[i][j] /= det;
-//     }
-//   }
-//   return adjoint;
-// }
-
-// // Main function
-// int main() {
-//   vector<vector<double>> matrix = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-//   vector<vector<double>> inverseMatrix = inverse(matrix);
-//   for (int i = 0; i < matrix.size(); i++) {
-//     for (int j = 0; j < matrix.size(); j++) {
-//       cout << inverseMatrix[i][j] << " ";
-//     }
-//     cout << endl;
-//   }
-//   return 0;
-// }
 #include <bits/stdc++.h>
 // #include <iostream>
 // #include <fstream>
@@ -94,7 +13,7 @@ void printMat(vector<vector<db>> v)
     int n = v.size();
     for (int i = 0; i < n; ++i)
     {
-        for(int j = 0 ; j < v[i].size() ; ++j)
+        for (int j = 0; j < v[i].size(); ++j)
         {
             std::cout << v[i][j] << " ";
         }
@@ -117,18 +36,125 @@ vector<vector<db>> matrixTranspose(vector<vector<db>> X)
     return Xt;
 }
 
+void getCofactor(vector<vector<double>> &mat, vector<vector<double>> &temp, int p, int q, int n)
+{
+    int i = 0, j = 0;
+
+    // Looping for each element of the matrix
+    for (int row = 0; row < n; row++)
+    {
+        for (int col = 0; col < n; col++)
+        {
+            // Copying into temporary matrix only those element which are not in given row and column
+            if (row != p && col != q)
+            {
+                temp[i][j++] = mat[row][col];
+
+                // Row is filled, so increase row index and reset col index
+                if (j == n - 1)
+                {
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+    }
+}
+
+// Recursive function for finding determinant of matrix.
+double determinant(vector<vector<double>> &mat, int n)
+{
+    double D = 0;
+
+    // Base case : if matrix contains single element
+    if (n == 1)
+        return mat[0][0];
+
+    vector<vector<double>> temp(n, vector<double>(n)); // To store cofactors
+
+    int sign = 1; // To store sign multiplier
+
+    // Iterate for each element of first row
+    for (int f = 0; f < n; f++)
+    {
+        // Getting Cofactor of mat[0][f]
+        getCofactor(mat, temp, 0, f, n);
+        D += sign * mat[0][f] * determinant(temp, n - 1);
+
+        // terms are to be added with alternate sign
+        sign = -sign;
+    }
+
+    return D;
+}
+
+// Function to get adjoint of A in adj[][]
+void adjoint(vector<vector<double>> &A, vector<vector<double>> &adj)
+{
+    int N = A.size();
+    if (N == 1)
+    {
+        adj[0][0] = 1;
+        return;
+    }
+
+    // temp is used to store cofactors of A[][]
+    int sign = 1;
+    vector<vector<double>> temp(N, vector<double>(N));
+
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            // Get cofactor of A[i][j]
+            getCofactor(A, temp, i, j, N);
+
+            // sign of adj[j][i] positive if sum of row and column indexes is even.
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+
+            // Interchanging rows and columns to get the transpose of the cofactor matrix
+            adj[j][i] = (sign) * (determinant(temp, N - 1));
+        }
+    }
+}
+
+// Function to calculate and store inverse, returns false if matrix is singular
+vector<vector<db>> inverse(vector<vector<double>> A)
+{
+    int N = A.size();
+    // Find determinant of A[][]
+    double det = determinant(A, N);
+    if (det == 0)
+    {
+        cout << "Singular matrix, can't find its inverse";
+        return {{}};
+    }
+
+    // Find adjoint
+    vector<vector<db>> inv(N, vector<db>(N));
+    vector<vector<double>> adj(N, vector<double>(N));
+    adjoint(A, adj);
+
+    // Find Inverse using formula "inverse(A) = adj(A)/det(A)"
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            inv[i][j] = adj[i][j] / det;
+
+    return inv;
+}
+
 vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
 {
     int n = X1.size(), m = X1[0].size();
     int kk = X2[0].size();
     vector<vector<db>> prod(n, vector<db>(kk, 0));
-    if(m == X2.size())
+    if (m == X2.size())
     {
-        for(int i = 0 ; i < n ; ++i)
+        for (int i = 0; i < n; ++i)
         {
-            for(int j = 0 ; j < kk ; ++j)
+            for (int j = 0; j < kk; ++j)
             {
-                for(int k = 0 ; k < m ; ++k)
+                for (int k = 0; k < m; ++k)
                 {
                     prod[i][j] += X1[i][k] * X2[k][j];
                 }
@@ -138,66 +164,67 @@ vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
     return prod;
 }
 
-vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
-    int n = matrix.size();
-    vector<vector<db>> inverse(n, vector<db>(n, 0));
+// vector<vector<db>> matrixInverse(vector<vector<db>> matrix) {
+//     int n = matrix.size();
+//     vector<vector<db>> inverse(n, vector<db>(n, 0));
 
-    // Initialize the inverse matrix as an identity matrix
-    for (int i = 0; i < n; i++) {
-        inverse[i][i] = 1.0;
-    }
+//     // Initialize the inverse matrix as an identity matrix
+//     for (int i = 0; i < n; i++) {
+//         inverse[i][i] = 1.0;
+//     }
 
-    // Perform Gaussian elimination
-    for (int i = 0; i < n; i++) {
-        // Find the pivot
-        db maxEl = abs(matrix[i][i]);
-        int maxRow = i;
-        for (int k = i + 1; k < n; k++) {
-            if (abs(matrix[k][i]) > maxEl) {
-                maxEl = abs(matrix[k][i]);
-                maxRow = k;
-            }
-        }
+//     // Perform Gaussian elimination
+//     for (int i = 0; i < n; i++) {
+//         // Find the pivot
+//         db maxEl = abs(matrix[i][i]);
+//         int maxRow = i;
+//         for (int k = i + 1; k < n; k++) {
+//             if (abs(matrix[k][i]) > maxEl) {
+//                 maxEl = abs(matrix[k][i]);
+//                 maxRow = k;
+//             }
+//         }
 
-        //Swap maximum row with current row
-        for (int k = i; k < n; k++) {
-            swap(matrix[maxRow][k], matrix[i][k]);
-            swap(inverse[maxRow][k], inverse[i][k]);
-        }
+//         //Swap maximum row with current row
+//         for (int k = i; k < n; k++) {
+//             swap(matrix[maxRow][k], matrix[i][k]);
+//             swap(inverse[maxRow][k], inverse[i][k]);
+//         }
 
-        // Make all rows below this one 0 in current column
-        for (int k = i + 1; k < n; k++) {
-            db c = -matrix[k][i] / matrix[i][i];
-            for (int j = 0; j < n; j++) {
-                 matrix[k][j] += c * matrix[i][j];
-                inverse[k][j] += c * inverse[i][j];
-            }
-        }
-    }
+//         // Make all rows below this one 0 in current column
+//         for (int k = i + 1; k < n; k++) {
+//             db c = -matrix[k][i] / matrix[i][i];
+//             for (int j = 0; j < n; j++) {
+//                  matrix[k][j] += c * matrix[i][j];
+//                 inverse[k][j] += c * inverse[i][j];
+//             }
+//         }
+//     }
 
-    // Solve equation Ax=b for an upper triangular matrix A
-    for (int i = n - 1; i > 0; i--) {
-        for (int j = i - 1; j >= 0; j--) {
-            db c = -matrix[j][i] / matrix[i][i];
-            for (int k = 0; k < n; k++) {
-                matrix[j][k] += c * matrix[i][k];
-                inverse[j][k] += c * inverse[i][k];
-            }
-        }
-    }
+//     // Solve equation Ax=b for an upper triangular matrix A
+//     for (int i = n - 1; i > 0; i--) {
+//         for (int j = i - 1; j >= 0; j--) {
+//             db c = -matrix[j][i] / matrix[i][i];
+//             for (int k = 0; k < n; k++) {
+//                 matrix[j][k] += c * matrix[i][k];
+//                 inverse[j][k] += c * inverse[i][k];
+//             }
+//         }
+//     }
 
-    // Normalize diagonal to 1
-    for (int i = 0; i < n; i++) {
-        db c = 1.0 / matrix[i][i];
-        for (int j = 0; j < n; j++) {
-            matrix[i][j] *= c;
-            inverse[i][j] *= c;
-        }
-    }
-    return inverse;
-}
+//     // Normalize diagonal to 1
+//     for (int i = 0; i < n; i++) {
+//         db c = 1.0 / matrix[i][i];
+//         for (int j = 0; j < n; j++) {
+//             matrix[i][j] *= c;
+//             inverse[i][j] *= c;
+//         }
+//     }
+//     return inverse;
+// }
 
-vector<vector<db>> trainmodel(){
+vector<vector<db>> trainmodel()
+{
     // Training the model using the training data
     ifstream file("traindata.csv");
     string line;
@@ -253,11 +280,7 @@ vector<vector<db>> trainmodel(){
         X[i].push_back(openPrices[i + 1]);
         Y.push_back({closePrices[i + 1]});
     }
-    // vector<vector<db>> Y = {Y1};
-    //printMat(X);
-    //printMat(Y);
-    //printMat(matrixTranspose(X));
-    vector<vector<db>> theta = matrixMultiply(matrixMultiply(matrixInverse(matrixMultiply(matrixTranspose(X), X)), matrixTranspose(X)), Y);
+    vector<vector<db>> theta = matrixMultiply(matrixMultiply(inverse(matrixMultiply(matrixTranspose(X), X)), matrixTranspose(X)), Y);
     return theta;
 }
 
@@ -269,7 +292,6 @@ void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, 
     file_1 << "Date,Cashflow\n";
     file_2 << "Date,Order_dir,Quantity,Price\n";
 
-    // Square off kab karna hai ? after enddate or on enddate currently on enddate
     for (int i = n; i < sz; i++)
     {
         file_1 << dates[i] << "," << final_amt[i] << "\n";
@@ -284,43 +306,44 @@ void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, 
     pnl.close();
 }
 
-void doLR(vector<string> dates, vector<db> prices,db p, int x, vector<db> yy){
-    
+void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy)
+{
+
     dates.erase(dates.begin());
     prices.erase(prices.begin());
-    
+
     int sz = dates.size();
     vector<int> buy_sell(sz, 0);
     vector<db> final_amt(sz, 0);
-    
+
     int portfolio = 0;
     for (int i = 0; i < sz; i++)
     {
-        if (yy[i] > prices[i]*(1 + p/100.0) && portfolio < x)
+        if (yy[i] > prices[i] * (1 + p / 100.0) && portfolio < x)
         {
             buy_sell[i] = -1;
             portfolio += 1;
         }
-        else if (yy[i] < prices[i]*(1 - p/100.0) && portfolio > -x)
+        else if (yy[i] < prices[i] * (1 - p / 100.0) && portfolio > -x)
         {
             buy_sell[i] = 1;
             portfolio -= 1;
         }
         final_amt[i] = buy_sell[i] * prices[i];
     }
-    
+
     make_csv(dates, prices, buy_sell, portfolio, final_amt, 0);
 }
 
 int main(int argc, char *argv[])
-{   
-    //getting the arguments
+{
+    // getting the arguments
     int x = stoi(argv[1]);
     db p = stod(argv[2]);
 
     vector<vector<db>> theta = trainmodel();
 
-    // Model has been trained now and we have the theta values. 
+    // Model has been trained now and we have the theta values.
     // Now we can use these theta values to predict the stock prices for the next n days.
 
     ifstream file("testdata.csv");
@@ -363,7 +386,7 @@ int main(int argc, char *argv[])
     file.close();
     int sz = dates.size() - 1;
     vector<vector<db>> X(sz, vector<db>(0));
-    
+
     for (int i = 0; i < sz; i++)
     {
         X[i].push_back(1);
@@ -376,10 +399,8 @@ int main(int argc, char *argv[])
         X[i].push_back(openPrices[i + 1]);
     }
 
-    cout << X.size() << " " << X[0].size() << endl;
-    cout << theta.size() << " " << theta[0].size() << endl; 
     vector<vector<db>> Y = matrixMultiply(X, theta);
-
+    printMat(Y);
     vector<db> yy;
     for (int i = 0; i < sz; i++)
     {
