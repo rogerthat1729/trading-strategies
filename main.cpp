@@ -300,6 +300,8 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
     vector<int> buy_sell(sz, 0);
     vector<db> final_amt(sz, 0);
     db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prevClosePrices[n]), abs(lowPrices[n] - prevClosePrices[n])));
+
+    // ADX has been set to DX for the start day due to ambiguity in the formula
     db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n - 1]), DIplus = DMplus/ATR, DIminus = DMminus/ATR, DX = (DIplus - DIminus)/(DIplus + DIminus), ADX = DX, alpha = 2.0 / (n + 1);
     //handle cases when any of the values in denom become 0
     for (int i = n; i < sz; i++)
