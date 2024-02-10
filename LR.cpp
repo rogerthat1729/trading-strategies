@@ -1,5 +1,5 @@
-//Sample code for inverse of matrix
-//For normal linear regression, use eqn theta = (X'X)^-1 * X'Y
+// Sample code for inverse of matrix
+// For normal linear regression, use eqn theta = (X'X)^-1 * X'Y
 
 // // Function to find the determinant of a matrix
 // double determinant(vector<vector<double>> matrix) {
@@ -80,8 +80,118 @@
 //   }
 //   return 0;
 // }
+#include <bits/stdc++.h>
+// #include <iostream>
+// #include <fstream>
+// #include <vector>
+// #include <string>
+// #include <ifstream>
+using namespace std;
+#define db double
+
+void printMat(vector<vector<db>> v)
+{
+    int n = v.size();
+    for (int i = 0; i < n; ++i)
+    {
+        for(int j = 0 ; j < v[i].size() ; ++j)
+        {
+            cout << v[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+vector<vector<db>> matrixTranspose(vector<vector<db>> X)
+{
+    vector<vector<db>> Xt(X[0].size(), vector<db>(X.size()));
+    int n = X.size();
+    int m = X[0].size();
+    for (int i = 0; i < m; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            Xt[i][j] = X[j][i];
+        }
+    }
+    return Xt;
+}
+
+vector<vector<db>> matrixMultiply(vector<vector<db>> X1, vector<vector<db>> X2)
+{
+    int n = X1.size(), m = X1[0].size();
+    vector<vector<db>> prod(X1.size(), vector<db>(X2[0].size(), 0));
+    if(m == X2.size())
+    {
+        for(int i = 0 ; i < n ; ++i)
+        {
+            for(int j = 0 ; j < m ; ++j)
+            {
+                for(int k = 0 ; k < m ; ++k)
+                {
+                    prod[i][j] += X1[i][k] * X2[k][j];
+                }
+            }
+        }
+    }
+    return prod;
+}
 
 int main(int argc, char *argv[])
 {
-    
+    ifstream file("traindata.csv");
+    string line;
+
+    vector<string> dates;
+    vector<db> highPrices;
+    vector<db> lowPrices;
+    vector<db> prevClosePrices;
+    vector<db> openPrices;
+    vector<db> closePrices;
+    vector<db> vwap;
+    vector<int> noOfTrades;
+
+    // skip header
+    getline(file, line);
+
+    while (getline(file, line))
+    {
+        stringstream ss(line);
+        string date, field;
+        getline(ss, field, ',');
+        if (getline(ss, date, ','))
+            dates.push_back(date);
+        if (getline(ss, field, ','))
+            highPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            lowPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            prevClosePrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            closePrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            openPrices.push_back(stod(field));
+        if (getline(ss, field, ','))
+            vwap.push_back(stod(field));
+        if (getline(ss, field))
+            noOfTrades.push_back(stoi(field));
+    }
+
+    int sz = dates.size() - 1;
+    vector<vector<db>> X(sz);
+    vector<db> Y(sz);
+    for (int i = 0; i < sz; i++)
+    {
+        X[i].push_back(1);
+        X[i].push_back(closePrices[i]);
+        X[i].push_back(openPrices[i]);
+        X[i].push_back(vwap[i]);
+        X[i].push_back(lowPrices[i]);
+        X[i].push_back(highPrices[i]);
+        X[i].push_back(noOfTrades[i]);
+        X[i].push_back(openPrices[i + 1]);
+        Y.push_back(closePrices[i + 1]);
+    }
+
+    return 0;
 }

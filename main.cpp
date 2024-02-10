@@ -159,7 +159,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             }
         }
 
-        if (prices[i] >= (1 + (p / 100.0)) * AMA && portfolio < x)
+        if (prices[i] >= (1 + (p / 100.0)) * AMA && portfolio < x && buy_sell[i] != -1)
         {
             if (sold.size() > 0)
             {
@@ -179,7 +179,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             buy_sell[i] -= 1;
             portfolio++;
         }
-        else if (prices[i] <= (1 - (p / 100.0)) * AMA && portfolio > -x)
+        else if (prices[i] <= (1 - (p / 100.0)) * AMA && portfolio > -x && buy_sell[i] != 1)
         {
             if (bought.size() > 0)
             {
@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
             prevClosePrices.push_back(stod(field));
         }
 
-        if (getline(ss, field))
+        if (getline(ss, field, ','))
         {
             prices.push_back(stod(field));
         }
