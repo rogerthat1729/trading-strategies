@@ -23,52 +23,58 @@ threshold ?= 2
 stop_loss_threshold ?= 4
 
 clean: $(strategy)
-	rm -f main
 	rm -f data.csv
 
 BASIC:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(start_date) $(end_date)
+	./main $(strategy) $(n) $(x)
+	rm -f main
 	
 DMA:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(p) $(start_date) $(end_date)
+	./main $(strategy) $(n) $(x) $(p)
+	rm -f main
 
 DMA++:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(x) $(p) $(n) $(max_hold_days) $(c1) $(c2) $(start_date) $(end_date)
+	./main $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2)
+	rm -f main
 
 MACD:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) 0 
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) 0 $(x) $(start_date) $(end_date) 
+	./main $(strategy) 0 $(x)
+	rm -f main
 
 RSI:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n) 
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(x) $(n) $(oversold_threshold) $(overbought_threshold) $(start_date) $(end_date)
+	./main $(strategy) $(n) $(x) $(oversold_threshold) $(overbought_threshold)
+	rm -f main
 
 ADX:
 	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) $(n)
 	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(adx_threshold) $(start_date) $(end_date)
+	./main $(strategy) $(n) $(x) $(adx_threshold)
+	rm -f main
 
 LINEAR_REGRESSION:
-	python3 fetch.py $(SYMBOL) $(start_date) $(end_date) 1
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(x) $(p) $(train_start_date) $(train_end_date) $(start_date) $(end_date)
+	python3 fetch.py $(SYMBOL) $(start_date) $(end_date)
+	g++ -std=c++20 -o LR LR.cpp
+	./LR $(x) $(p) $(train_start_date) $(train_end_date) $(start_date) $(end_date)
+	rm -f LR
 
 PAIRS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n) 1
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n) 1
+	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(start_date) $(end_date)
 
 PAIRS_WITH_STOP_LOSS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n) 1
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n) 1
+	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
 	g++ -std=c++20 -o main main.cpp
 	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(stop_loss_threshold) $(start_date) $(end_date)

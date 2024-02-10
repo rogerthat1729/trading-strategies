@@ -381,23 +381,20 @@ int main(int argc, char *argv[])
     }
     file.close();
 
+    int n = stoi(argv[2]);
+    int x = stoi(argv[3]);
+
     if (strategy == "BASIC")
     {
-        int n = stoi(argv[2]);
-        int x = stoi(argv[3]);
         S1_1(dates, prices, n, x);
     }
     else if (strategy == "DMA")
     {
-        int n = stoi(argv[2]);
-        int x = stoi(argv[3]);
         db p = stod(argv[4]);
         S1_2(dates, prices, n, x, p);
     }
     else if (strategy == "DMA++")
     {
-        int n = stoi(argv[2]);
-        int x = stoi(argv[3]);
         db p = stod(argv[4]);
         int mhd = stoi(argv[5]);
         db c1 = stod(argv[6]);
@@ -406,22 +403,16 @@ int main(int argc, char *argv[])
     }
     else if (strategy == "MACD")
     {
-        int n = stoi(argv[2]);
-        int x = stoi(argv[3]);
         S1_4_1(dates, prices, n, x);
     }
     else if (strategy == "RSI")
     {
-        int x = stoi(argv[2]);
-        int n = stoi(argv[3]);
         db overbought = stod(argv[4]);
         db oversold = stod(argv[5]);
         S1_4_2(dates, prices, n, x, overbought, oversold);
     }
     else if (strategy == "ADX")
     {
-        int n = stoi(argv[2]);
-        int x = stoi(argv[3]);
         int adx_threshold = stoi(argv[4]);
         S1_4_3(dates, highPrices, lowPrices, prevClosePrices, prices, n, x, adx_threshold);
     }
