@@ -21,6 +21,6 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
 
 void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, db adx_threshold);
 
-void work(int argc, vector<string> args);
+db work(int argc, vector<string> args);
 
 #endif

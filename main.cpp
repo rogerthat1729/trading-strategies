@@ -11,6 +11,9 @@ using namespace std;
 // Remove cashflow floating point error
 // Match outputs in all cases
 
+//New executer file created, so main function not reqd in this file
+//Format of functions changed to - pass your output by reference, then modify it and return void - instead of making csv file in the function itself
+
 void make_csv_main(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n)
 {
     int sz = prices.size();
@@ -34,11 +37,10 @@ void make_csv_main(vector<string> &dates, vector<db> &prices, vector<int> &buy_s
     pnl.close();
 }
 
-void S1_1(vector<string> &dates, vector<db> &prices, int n, int x)
+void S1_1(vector<string> &dates, vector<db> &prices, int n, int x, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
     int sz = prices.size();
-    vector<db> final_amt(sz, 0);
-    vector<int> changes(sz, 0), buy_sell(sz, 0);
+    vector<int> changes(sz, 0);
     for (int i = 1; i < sz; i++)
     {
         if (prices[i] > prices[i - 1])
@@ -48,9 +50,7 @@ void S1_1(vector<string> &dates, vector<db> &prices, int n, int x)
         else
             changes[i] = changes[i - 1];
     }
-
-    int portfolio = 0;
-
+    
     // Clarify what last n days really means
     for (int i = n; i < sz; i++)
     {
@@ -66,14 +66,13 @@ void S1_1(vector<string> &dates, vector<db> &prices, int n, int x)
         }
         final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
-    make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
+    return;
 }
 
-void S1_2(vector<string> dates, vector<db> prices, int n, int x, db p)
+void S1_2(vector<string> dates, vector<db> prices, int n, int x, db p, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
-    int sz = dates.size(), portfolio = 0;
-    vector<int> buy_sell(sz, 0);
-    vector<db> DMA(sz, 0), final_amt(sz, 0);
+    int sz = dates.size();
+    vector<db> DMA(sz, 0);
     db sum = 0, sum_sq = 0;
     for (int i = 0; i < n; ++i)
     {
@@ -103,7 +102,6 @@ void S1_2(vector<string> dates, vector<db> prices, int n, int x, db p)
         }
         final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
-    make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
 db updateSF(db SF, db ER, db c1, db c2)
@@ -111,11 +109,9 @@ db updateSF(db SF, db ER, db c1, db c2)
     return SF + c1 * ((((2 * ER) / (1 + c2) - 1) / ((2 * ER) / (1 + c2) + 1)) - SF);
 }
 
-void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, db c1, db c2)
+void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, db c1, db c2, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
-    int sz = dates.size(), portfolio = 0, max_hold_days = 0, running_days = 0, earliest_index = 1e9;
-    vector<int> buy_sell(sz, 0);
-    vector<db> final_amt(sz, 0);
+    int sz = dates.size(), max_hold_days = 0, running_days = 0, earliest_index = 1e9;
     db running_denom = 0, SF = 0.5, AMA = prices[n], ER;
     queue<int> bought, sold;
 
@@ -220,14 +216,11 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             running_denom += abs(prices[i] - prices[i + 1]);
         }
     }
-    make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
+void S1_4_1(vector<string> dates, vector<db> prices, int n, int x, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
-    int sz = dates.size(), portfolio = 0;
-    vector<int> buy_sell(sz, 0);
-    vector<db> final_amt(sz, 0);
+    int sz = dates.size();
     db shortEWM = prices[n], longEWM = prices[n], MACD = 0, signal = 0;
     db shortalpha = 2.0 / 13.0, longalpha = 2.0 / 27.0, MACDalpha = 2.0 / 10.0;
 
@@ -254,15 +247,12 @@ void S1_4_1(vector<string> dates, vector<db> prices, int n, int x)
         else
             final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
     }
-    make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought, db oversold)
+void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought, db oversold, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
-    int sz = dates.size(), portfolio = 0;
-    vector<int> buy_sell(sz, 0);
-    vector<db> final_amt(sz, 0);
-
+    int sz = dates.size();
+    
     // Checked avgLoss=0 condition
 
     db avgGain = 0, avgLoss = 0, RS, RSI;
@@ -311,12 +301,10 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
     make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, db adx_threshold)
+void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, vector<db> prevClosePrices, vector<db> prices, int n, int x, db adx_threshold, vector<db> &final_amt, vector<int> &buy_sell, int& portfolio)
 {
     // In buy_sell, -1 means buy, 1 means sell
-    int sz = dates.size(), portfolio = 0;
-    vector<int> buy_sell(sz, 0);
-    vector<db> final_amt(sz, 0);
+    int sz = dates.size();
     db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prevClosePrices[n]), abs(lowPrices[n] - prevClosePrices[n])));
 
     // ADX has been set to DX for the start day due to ambiguity in the formula
@@ -359,7 +347,7 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
     make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
 }
 
-void work(int argc, vector<string> args)
+db work(int argc, vector<string> args)
 {
     string strategy = args[1];
 
@@ -412,15 +400,20 @@ void work(int argc, vector<string> args)
 
     int n = stoi(args[2]);
     int x = stoi(args[3]);
+    int sz = prices.size();
+    
+    vector<db> final_amt(sz, 0);
+    vector<int> buy_sell(sz, 0);
+    int portfolio = 0;
 
     if (strategy == "BASIC")
     {
-        S1_1(dates, prices, n, x);
+        S1_1(dates, prices, n, x, final_amt, buy_sell, portfolio);
     }
     else if (strategy == "DMA")
     {
         db p = stod(args[4]);
-        S1_2(dates, prices, n, x, p);
+        S1_2(dates, prices, n, x, p, final_amt, buy_sell, portfolio);
     }
     else if (strategy == "DMA++")
     {
@@ -428,32 +421,24 @@ void work(int argc, vector<string> args)
         int mhd = stoi(args[5]);
         db c1 = stod(args[6]);
         db c2 = stod(args[7]);
-        S1_3(dates, prices, n, x, p, mhd, c1, c2);
+        S1_3(dates, prices, n, x, p, mhd, c1, c2, final_amt, buy_sell, portfolio);
     }
     else if (strategy == "MACD")
     {
-        S1_4_1(dates, prices, n, x);
+        S1_4_1(dates, prices, n, x, final_amt, buy_sell, portfolio);
     }
     else if (strategy == "RSI")
     {
         db overbought = stod(args[4]);
         db oversold = stod(args[5]);
-        S1_4_2(dates, prices, n, x, overbought, oversold);
+        S1_4_2(dates, prices, n, x, overbought, oversold, final_amt, buy_sell, portfolio);
     }
     else if (strategy == "ADX")
     {
         db adx_threshold = stod(args[4]);
-        S1_4_3(dates, highPrices, lowPrices, prevClosePrices, prices, n, x, adx_threshold);
+        S1_4_3(dates, highPrices, lowPrices, prevClosePrices, prices, n, x, adx_threshold, final_amt, buy_sell, portfolio);
     }
+    make_csv_main(dates, prices, buy_sell, portfolio, final_amt, n);
+    return final_amt.back() + portfolio * prices.back();
 }
 
-int main(int argc, char *argv[])
-{
-    vector<string> args;
-    for(int i = 0 ; i < argc ; ++i)
-    {
-        args.push_back(argv[i]);
-    }
-    work(argc, args);
-    return 0;
-}

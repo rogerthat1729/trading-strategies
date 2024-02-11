@@ -4,15 +4,6 @@
 using namespace std;
 #define db double
 
-db read_data()
-{
-    ifstream file("final_pnl.txt");
-    db x;
-    file >> x;
-    file.close();
-    return x;
-}
-
 int main()
 {
     db PnL = INT_MAX;
@@ -21,14 +12,14 @@ int main()
         #pragma omp section
         {
             vector<string> args = {"main", "BASIC", "7", "5"};
-            work(4, args);
-            PnL = min(PnL, read_data());
+            db pnl = work(4, args);
+            // cout << pnl << endl;
         }
         #pragma omp section
         {
             vector<string> args = {"main", "DMA", "50", "5", "2"};
-            work(5, args);
-            PnL = min(PnL, read_data());
+            db pnl = work(5, args);
+            // cout << pnl << endl;
         }
     }
     return 0;

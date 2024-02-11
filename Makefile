@@ -27,39 +27,39 @@ clean: $(strategy)
 
 BASIC:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) $(n) $(x)
+	rm -f executer
 	
 DMA:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(p)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) $(n) $(x) $(p)
+	rm -f executer
 
 DMA++:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2)
+	rm -f executer
 
 MACD:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) 0 
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) 0 $(x)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) 0 $(x)
+	rm -f executer
 
 RSI:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(oversold_threshold) $(overbought_threshold)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) $(n) $(x) $(oversold_threshold) $(overbought_threshold)
+	rm -f executer
 
 ADX:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n)
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(n) $(x) $(adx_threshold)
-	rm -f main
+	g++ main.cpp executer.cpp -o executer
+	./executer $(strategy) $(n) $(x) $(adx_threshold)
+	rm -f executer
 
 LINEAR_REGRESSION:
 	python3 fetchLR.py $(symbol) $(train_start_date) $(train_end_date) $(start_date) $(end_date) 
@@ -74,8 +74,8 @@ BEST_OF_ALL:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n)
 	# g++ --std=c++20 -o LR LR.cpp
 	# ./LR $(x) $(p)
-	g++ -c main.cpp -o main.o
-	g++ -fopenmp -c best.cpp -o best.o 
+	g++ -c main.cpp
+	g++ -fopenmp -c best.cpp
 	g++ -fopenmp main.o best.o -o best
 	./best $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold)
 	rm -f best
