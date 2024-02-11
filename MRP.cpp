@@ -152,6 +152,7 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 // overall portfolio is +ve that is only sell signals generated generate another
                 sell_tracker.push_back({i, {mean, stdev}});
                 buy_sell1[i] += 1;
+                sell_tracker_sz += 1;
             }
             else
             {
@@ -194,6 +195,7 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 // overall portfolio is -ve that is only buy signals generated generate another
                 buy_tracker.push_back({i, {mean, stdev}});
                 buy_sell1[i] -= 1;
+                buy_tracker_sz += 1;
             }
             else
             {
@@ -226,6 +228,50 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 }
             }
         }
+
+        // updating the buy and sell trackers finally if no signal was raised 
+        if (buy_crossed > 0)
+                {
+                    // here we clear out all the crossed ones and include the sell in it only.
+                    buy_sell1[i] += buy_crossed; // overlapping today's sell with the crossed ones
+
+                    //updated the buy_tracker
+                    vector<pair<int, pair<db, db>>> temp;
+                    for (int i = 0; i < buy_tracker_sz; i++)
+                    {
+                        if (spread[buy_tracker[i].first] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
+                        {
+                            
+                        }else{
+                            temp.push_back(buy_tracker[i]);
+                        }
+                    }
+                    buy_tracker = temp;
+                    buy_crossed = 0;
+                    buy_tracker_sz = buy_tracker.size();
+                }
+        if(sell_crossed > 0)
+                {
+                    // here we clear out all the crossed ones and include the buy in it only.
+                    buy_sell1[i] -= sell_crossed; // overlapping today's buy with the crossed ones
+
+                    //updated the sell_tracker
+                    vector<pair<int, pair<db, db>>> temp;
+                    for (int i = 0; i < sell_tracker_sz; i++)
+                    {
+                        if (spread[sell_tracker[i].first] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
+                        {
+                            
+                        }else{
+                            temp.push_back(sell_tracker[i]);
+                        }
+                    }
+                    sell_tracker = temp;
+                    sell_crossed = 0;
+                    sell_tracker_sz = sell_tracker.size();
+                }
+
+
         if (i > 0)
         {
             final_amt[i] = final_amt[i - 1];
