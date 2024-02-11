@@ -12,17 +12,6 @@ cols = ["DATE", "HIGH", "LOW", "PREV. CLOSE", "CLOSE"]
     
 start_date = datetime.strptime(sd, "%d/%m/%Y").date()
 end_date = datetime.strptime(ed, "%d/%m/%Y").date()
-
-#get correct start date
-temp_df = stock_df(symbol=sym, from_date=start_date,to_date=start_date + relativedelta(days = 7), series="EQ")
-temp_df = temp_df.iloc[::-1].reset_index(drop=True)
-temp_df["DATE"] = pd.to_datetime(temp_df["DATE"]).dt.strftime("%d/%m/%Y")
-sd = temp_df.iloc[0]["DATE"]
-# got the correct start date    
-
-# going to the correct start date which is a trading day
-start_date = datetime.strptime(sd, "%d/%m/%Y").date()
-
 csv_start_date = start_date - relativedelta(days = n+7)
 
 #get correct start date

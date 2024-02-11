@@ -89,4 +89,7 @@ PAIRS:
 	python3 fetchMP.py $(symbol2) $(start_date) $(end_date) $(n)
 	g++ -std=c++20 -o MRP MRP.cpp
 	./MRP $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(stop_loss_threshold) $(start_date) $(end_date)
+	rm -f MRP
+	rm -f $(symbol1).csv 
+	rm -f $(symbol2).csv
 
