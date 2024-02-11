@@ -23,7 +23,7 @@ threshold ?= 2
 stop_loss_threshold ?= -5 # garbage value
 
 clean: $(strategy)
-	 rm -f data.csv
+	#  rm -f data.csv
 
 BASIC:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
@@ -52,7 +52,7 @@ MACD:
 RSI:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
 	g++ main.cpp executer.cpp -o executer
-	./executer $(strategy) $(n) $(x) $(oversold_threshold) $(overbought_threshold)
+	./executer $(strategy) $(n) $(x) $(overbought_threshold) $(oversold_threshold)
 	rm -f executer
 
 ADX:
@@ -71,7 +71,7 @@ LINEAR_REGRESSION:
 
 BEST_OF_ALL:
 	python3 fetchLRforBest.py $(symbol) $(start_date) $(end_date)
-	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n)
+	python3 fetch.py $(symbol) $(start_date) $(end_date) 50
 	g++ -c LR.cpp
 	g++ -c main.cpp
 	g++ -fopenmp -c best.cpp

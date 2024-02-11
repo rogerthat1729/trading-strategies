@@ -5,11 +5,13 @@
 using namespace std;
 #define db double
 
+// Need to fix the data thing in BEST_OF_ALL
+
 int main()
 {
     db PnL = INT_MIN;
     string best_strategy;
-    
+
     map<string, vector<string>> run;
     run["BASIC"] = {"main", "BASIC", "7", "5"};
     run["DMA"] = {"main", "DMA", "50", "5", "2"};
@@ -18,7 +20,7 @@ int main()
     run["RSI"] = {"main", "RSI", "14", "5", "70", "30"};
     run["ADX"] = {"main", "ADX", "14", "5", "25"};
     run["LR"] = {"LR", "7", "5"};
-    
+
     map<int, string> index;
     index[0] = "BASIC";
     index[1] = "DMA";
@@ -27,35 +29,41 @@ int main()
     index[4] = "RSI";
     index[5] = "ADX";
     index[6] = "LR";
-    
+
 #pragma omp parallel for num_threads(7)
 
-for(int i = 0; i < 7; i++)
-{
-    vector<string> args = run[index[i]];
-    db pnl;
-    if(index[i]=="LR")
-        pnl = workLR(3, args);
-    else
-        pnl = work(args.size(), args);
-    #pragma omp critical
+    for (int i = 0; i < 7; i++)
     {
-        std::cout << index[i] << ": " << pnl << endl;
-        if (pnl > PnL)
+        vector<string> args = run[index[i]];
+        db pnl;
+        if (index[i] == "LR")
+            pnl = workLR(args);
+        else
         {
-            PnL = pnl;
-            best_strategy = index[i];
+            args.insert(args.begin(), "1");
+            pnl = work(args);
+        }
+#pragma omp critical
+        {
+            std::cout << index[i] << ": " << pnl << endl;
+            if (pnl > PnL)
+            {
+                PnL = pnl;
+                best_strategy = index[i];
+            }
         }
     }
-}
     cout << "Best Strategy: " << best_strategy << endl;
-    
+
     vector<string> args = run[best_strategy];
-    if(best_strategy=="LR")
-        workLR(3, args);
+    if (best_strategy == "LR")
+        workLR(args);
     else
-        work(args.size(), args);
-    
+    {
+        args.insert(args.begin(), "1");
+        work(args);
+    }
+
     // vector<string> args = {"main", "BASIC", "7", "5"};
     // db pnl = work(4, args);
     // cout << "BASIC: " << pnl << endl;

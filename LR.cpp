@@ -33,6 +33,7 @@ vector<vector<db>> matrixTranspose(vector<vector<db>> X)
 
 void getCofactor(vector<vector<db>> &mat, vector<vector<db>> &temp, int p, int q, int n)
 {
+    // cofactor only for square matrix
     for (int i = 0, r = 0; i < n; i++)
     {
         if (i == p)
@@ -48,83 +49,79 @@ void getCofactor(vector<vector<db>> &mat, vector<vector<db>> &temp, int p, int q
     }
 }
 
-// Recursive function for finding determinant of matrix.
 db determinant(vector<vector<db>> &mat, int n)
 {
     db D = 0;
 
-    // Base case : if matrix contains single element
+    // Base case
     if (n == 1)
         return mat[0][0];
 
-    vector<vector<db>> temp(n, vector<db>(n)); // To store cofactors
+    vector<vector<db>> temp(n - 1, vector<db>(n - 1));
 
-    int sign = 1; // To store sign multiplier
+    int sign = 1;
 
     // Iterate for each element of first row
     for (int f = 0; f < n; f++)
     {
-        // Getting Cofactor of mat[0][f]
+
         getCofactor(mat, temp, 0, f, n);
         D += sign * mat[0][f] * determinant(temp, n - 1);
 
-        // terms are to be added with alternate sign
+        // change sign
         sign = -sign;
     }
 
     return D;
 }
 
-// Function to get adjoint of A in adj[][]
-void adjoint(vector<vector<db>> &A, vector<vector<db>> &adj)
+void adjoint(vector<vector<db>> &mat, vector<vector<db>> &adj)
 {
-    int N = A.size();
-    if (N == 1)
+    int n = mat.size();
+    if (n == 1)
     {
-        adj[0][0] = 1;
+        adj[0][0] = mat[0][0]; //hope never comes
         return;
     }
 
     // temp is used to store cofactors of A[][]
     int sign = 1;
-    vector<vector<db>> temp(N, vector<db>(N));
+    vector<vector<db>> temp(n, vector<db>(n));
 
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < N; j++)
+        for (int j = 0; j < n; j++)
         {
-            // Get cofactor of A[i][j]
-            getCofactor(A, temp, i, j, N);
+            getCofactor(mat, temp, i, j, n);
 
-            // sign of adj[j][i] positive if sum of row and column indexes is even.
+            // sign calculated
             sign = ((i + j) % 2 == 0) ? 1 : -1;
 
-            // Interchanging rows and columns to get the transpose of the cofactor matrix
-            adj[j][i] = (sign) * (determinant(temp, N - 1));
+            //transpose and store
+            adj[j][i] = (sign) * (determinant(temp, n - 1));
         }
     }
 }
 
-// Function to calculate and store inverse, returns false if matrix is singular
-vector<vector<db>> inverse(vector<vector<db>> A)
+vector<vector<db>> inverse(vector<vector<db>>mat)
 {
-    int N = A.size();
-    // Find determinant of A[][]
-    db det = determinant(A, N);
+    int n = mat.size();
+    
+    db det = determinant(mat, n);
     if (det == 0)
     {
-        cout << "Singular matrix, can't find its inverse";
+        cout << "Singular matrix.\n";
         return {{}};
     }
 
-    // Find adjoint
-    vector<vector<db>> inv(N, vector<db>(N));
-    vector<vector<db>> adj(N, vector<db>(N));
-    adjoint(A, adj);
+   
+    vector<vector<db>> inv(n, vector<db>(n));
+    vector<vector<db>> adj(n, vector<db>(n));
+    adjoint(mat, adj);
 
-    // Find Inverse using formula "inverse(A) = adj(A)/det(A)"
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++)
+    
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
             inv[i][j] = adj[i][j] / det;
 
     return inv;
@@ -193,10 +190,10 @@ vector<vector<db>> trainmodel()
     }
 
     file.close();
-    int sz = dates.size() - 1;
+    int sz = dates.size() - 1; // sz reduced here
     vector<vector<db>> X(sz);
     vector<vector<db>> Y;
-    for (int i = 0; i < sz; i++)
+    for (int i = 0; i < sz; i++) // sz again reduced here correct
     {
         X[i].push_back(1);
         X[i].push_back(closePrices[i]);
@@ -234,7 +231,7 @@ void make_csv_LR(vector<string> &dates, vector<db> &prices, vector<int> &buy_sel
     pnl.close();
 }
 
-void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy, db& pnl)
+void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy, db &pnl)
 {
     dates.erase(dates.begin());
     prices.erase(prices.begin());
@@ -256,15 +253,15 @@ void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy, d
             buy_sell[i] = 1;
             portfolio -= 1;
         }
-        if(i>0)
-            final_amt[i] = final_amt[i-1];
+        if (i > 0)
+            final_amt[i] = final_amt[i - 1];
         final_amt[i] += buy_sell[i] * prices[i];
     }
     pnl = final_amt.back() + portfolio * prices[sz - 1];
     make_csv_LR(dates, prices, buy_sell, portfolio, final_amt, 0);
 }
 
-db workLR(int argc, vector<string> args)
+db workLR(vector<string> args)
 {
     // getting the arguments
     int x = stoi(args[1]);

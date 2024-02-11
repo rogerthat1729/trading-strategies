@@ -130,14 +130,14 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
 
         for (int i = 0; i < sell_tracker_sz; i++)
         {
-            if (spread[sell_tracker[i].first] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
+            if (spread[i] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
             {
                 sell_crossed += 1;
             }
         }
         for (int i = 0; i < buy_tracker_sz; i++)
         {
-            if (spread[buy_tracker[i].first] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
+            if (spread[i] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
             {
                 buy_crossed += 1;
             }
@@ -145,7 +145,7 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
 
         if (zscore > threshold && portfolio > -x)
         { // SELL S1 and BUY S2
-            portfolio -= 1;
+            
 
             if (buy_tracker_sz == 0)
             {
@@ -153,6 +153,13 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 sell_tracker.push_back({i, {mean, stdev}});
                 buy_sell1[i] += 1;
                 sell_tracker_sz += 1;
+                portfolio -= 1;
+                
+                //check if today's trade crossed the stoploss threshold also. 
+                if ( zscore > stop_loss_threshold)
+                {
+                    sell_crossed += 1;
+                }
             }
             else
             {
@@ -161,14 +168,14 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 {
                     // here we clear out all the crossed ones and include the sell in it only.
                     buy_sell1[i] += buy_crossed; // overlapping today's sell with the crossed ones
-
+                    portfolio -=buy_crossed ;
                     //updated the buy_tracker
                     vector<pair<int, pair<db, db>>> temp;
                     for (int i = 0; i < buy_tracker_sz; i++)
                     {
-                        if (spread[buy_tracker[i].first] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
+                        if (spread[i] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
                         {
-                            
+                            // don't include these they crossed the stop_loss
                         }else{
                             temp.push_back(buy_tracker[i]);
                         }
@@ -176,19 +183,20 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                     buy_tracker = temp;
                     buy_crossed = 0;
                     buy_tracker_sz = buy_tracker.size();
+                    
                 }
                 else
                 {
+                    // no buy crossed so we will sell the oldest one ASSUMPTION!!
                     buy_tracker.erase(buy_tracker.begin());
                     buy_tracker_sz -= 1;
                     buy_sell1[i] += 1;
+                    portfolio -= 1;
                 }
             }
         }
         else if (zscore < -threshold && portfolio < x)
         { // BUY S1 and SELL S2
-
-            portfolio += 1;
             
             if (sell_tracker_sz == 0)
             {
@@ -196,6 +204,13 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 buy_tracker.push_back({i, {mean, stdev}});
                 buy_sell1[i] -= 1;
                 buy_tracker_sz += 1;
+                portfolio += 1;
+                
+                //check if today's trade crossed the stoploss threshold also.
+                if ( zscore < -stop_loss_threshold)
+                {
+                    buy_crossed += 1;
+                }
             }
             else
             {
@@ -204,12 +219,13 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 {
                     // here we clear out all the crossed ones and include the buy in it only.
                     buy_sell1[i] -= sell_crossed; // overlapping today's buy with the crossed ones
+                    portfolio += sell_crossed;
 
                     //updated the sell_tracker
                     vector<pair<int, pair<db, db>>> temp;
                     for (int i = 0; i < sell_tracker_sz; i++)
                     {
-                        if (spread[sell_tracker[i].first] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
+                        if (spread[i] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
                         {
                             
                         }else{
@@ -222,9 +238,11 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 }
                 else
                 {
+                    // no sell crossed so we will buy the oldest one
                     sell_tracker.erase(sell_tracker.begin());
                     sell_tracker_sz -= 1;
                     buy_sell1[i] -= 1;
+                    portfolio += 1;
                 }
             }
         }
@@ -234,12 +252,12 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 {
                     // here we clear out all the crossed ones and include the sell in it only.
                     buy_sell1[i] += buy_crossed; // overlapping today's sell with the crossed ones
-
+                    portfolio -= buy_crossed;
                     //updated the buy_tracker
                     vector<pair<int, pair<db, db>>> temp;
                     for (int i = 0; i < buy_tracker_sz; i++)
                     {
-                        if (spread[buy_tracker[i].first] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
+                        if (spread[i] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
                         {
                             
                         }else{
@@ -254,12 +272,12 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                 {
                     // here we clear out all the crossed ones and include the buy in it only.
                     buy_sell1[i] -= sell_crossed; // overlapping today's buy with the crossed ones
-
+                    portfolio += sell_crossed;
                     //updated the sell_tracker
                     vector<pair<int, pair<db, db>>> temp;
                     for (int i = 0; i < sell_tracker_sz; i++)
                     {
-                        if (spread[sell_tracker[i].first] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
+                        if (spread[i] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
                         {
                             
                         }else{

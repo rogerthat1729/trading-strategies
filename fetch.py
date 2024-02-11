@@ -12,7 +12,7 @@ cols = ["DATE", "HIGH", "LOW", "PREV. CLOSE", "CLOSE"]
     
 start_date = datetime.strptime(sd, "%d/%m/%Y").date()
 end_date = datetime.strptime(ed, "%d/%m/%Y").date()
-csv_start_date = start_date - relativedelta(days = n+7)
+csv_start_date = start_date - relativedelta(days = n+100)
 
 #get correct start date
 temp_df = stock_df(symbol=sym, from_date=start_date,to_date=start_date + relativedelta(days = 7), series="EQ")

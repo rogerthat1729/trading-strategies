@@ -23,6 +23,6 @@ vector<vector<db>> trainmodel();
 
 void make_csv_LR(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n);
 
-db workLR(int argc, vector<string> args);
+db workLR(vector<string> args);
 
 #endif
