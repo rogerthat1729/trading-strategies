@@ -7,7 +7,7 @@ directory = os.getcwd()
 for filename in os.listdir(directory):
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
-        if filename.endswith(".csv") or filename.endswith(".txt"):
+        if filename.endswith(".csv") or filename.endswith(".txt") or filename.endswith(".exe"):
             os.remove(file_path)  # Delete the file
             print(f"Deleted {file_path}")
         # else:

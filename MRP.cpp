@@ -84,6 +84,26 @@ void MRP(vector<db> spread, vector<string> dates, int n, int x, db threshold, ve
     make_csv(dates, spread, buy_sell1, portfolio, final_amt, n, pri, pri2);
 }
 
+void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshold, vector<db>& pri, vector<db>&pri2, int stop_loss_threshold){
+    int sz = spread.size();
+
+    db mean = 0.0;
+    db sqmean = 0.0;
+    db stdev = 0.0;
+    db zscore = 0.0;
+    int portfolio = 0;
+    vector<int> buy_sell1(sz,0);
+    vector<int> buy_sell2(sz,0);
+    vector<db> final_amt(sz,0);
+
+    for(int i = 0; i < n-1; i++){
+        mean += spread[i];
+        sqmean += spread[i]*spread[i];
+    }
+    mean = mean/n;
+    sqmean = sqmean/n;
+
+}
 
 
 int main(int argc, char *argv[])
@@ -165,7 +185,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        cout << "Stop loss not implemented" << endl;
+        MRP_stop(spread, dates, n, x, threshold,prices,prices2,stop_loss_threshold);
     }
     
     return 0;
