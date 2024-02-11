@@ -1,0 +1,41 @@
+from jugaad_data.nse import stock_df
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import pandas as pd
+import sys
+
+sym = sys.argv[1]
+sd = sys.argv[2]
+ed = sys.argv[3]
+cols = ["DATE", "HIGH", "LOW", "PREV. CLOSE", "CLOSE", "OPEN", "VWAP", "NO OF TRADES"]
+
+start_date = datetime.strptime(sd, "%d/%m/%Y").date()
+end_date = datetime.strptime(ed, "%d/%m/%Y").date()
+train_start_date = start_date - relativedelta(years=1)
+train_end_date = end_date - relativedelta(years=1)
+
+def give_df(sym, sd, ed, cols):
+    csv_start_date = sd - relativedelta(days = 5)
+    
+    #get correct start date
+    temp_df = stock_df(symbol=sym, from_date=sd,to_date=sd + relativedelta(days = 7), series="EQ")
+    temp_df = temp_df.iloc[::-1].reset_index(drop=True)
+    temp_df["DATE"] = pd.to_datetime(temp_df["DATE"]).dt.strftime("%d/%m/%Y")
+    sad = temp_df.iloc[0]["DATE"]
+    # got the correct start date
+    
+    df = stock_df(symbol=sym, from_date=csv_start_date,to_date=ed, series="EQ")
+    df = df[cols]
+    df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
+    df = df.iloc[::-1].reset_index(drop=True)
+    idx_start = df[df["DATE"] == sad].index[0]
+    idx_start -= 1
+    idx_start = max(0, idx_start)
+    df1 = df.iloc[idx_start:]
+    return df1
+
+df_train = give_df(sym, train_start_date, train_end_date, cols)
+df_train.to_csv("traindata.csv")
+
+df_test = give_df(sym, start_date, end_date, cols)
+df_test.to_csv("testdata.csv")

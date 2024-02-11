@@ -1,4 +1,3 @@
-
 #include <bits/stdc++.h>
 // #include <iostream>
 // #include <fstream>
@@ -284,7 +283,7 @@ vector<vector<db>> trainmodel()
     return theta;
 }
 
-void make_csv(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n)
+void make_csv_LR(vector<string> &dates, vector<db> &prices, vector<int> &buy_sell, int portfolio, vector<db> &final_amt, int n)
 {
     int sz = prices.size();
     ofstream file_1("daily_cashflow.csv"), file_2("order_statistics.csv"), pnl("final_pnl.txt");
@@ -335,7 +334,7 @@ void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy)
         final_amt[i] += buy_sell[i] * prices[i] ;
     }
 
-    make_csv(dates, prices, buy_sell, portfolio, final_amt, 0);
+    make_csv_LR(dates, prices, buy_sell, portfolio, final_amt, 0);
 }
 
 int main(int argc, char *argv[])
