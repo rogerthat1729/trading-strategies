@@ -21,10 +21,10 @@ void make_csv(vector<string> &dates, vector<db> &spread, vector<int> &buy_sell1,
         file_1 << dates[i] << "," << final_amt[i] << "\n";
         if (buy_sell1[i] != 0){
             file_2 << dates[i] << "," << (buy_sell1[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell1[i]) << "," << prices[i] << "\n";
-            file_2 << dates[i] << "," << (buy_sell1[i] > 0 ? "BUY" : "SELL") << "," << abs(buy_sell1[i]) << "," << prices2[i] << "\n";
+            file_3 << dates[i] << "," << (buy_sell1[i] > 0 ? "BUY" : "SELL") << "," << abs(buy_sell1[i]) << "," << prices2[i] << "\n";
         }
     }
-
+    // file_1 << dates.back() << "," <<  portfolio * spread[sz - 1] <<"Cleared the portfolio" << "\n";
     pnl << final_amt.back() + portfolio * spread[sz - 1] << "\n";
 
     file_1.close();
@@ -156,10 +156,16 @@ int main(int argc, char *argv[])
     int x = stoi(argv[4]);
     int n = stoi(argv[5]);
     db threshold = stod(argv[6]);
+
+    int stop_loss_threshold = stoi(argv[7]);
     
-    if (strategy == "PAIRS")
+    if (stop_loss_threshold == -5)
     {
         MRP(spread, dates, n, x, threshold,prices,prices2);
+    }
+    else
+    {
+        cout << "Stop loss not implemented" << endl;
     }
     
     return 0;

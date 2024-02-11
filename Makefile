@@ -20,7 +20,7 @@ train_end_date ?= 01/01/2019
 symbol1 ?= "SBIN"
 symbol2 ?= "ADANIENT"
 threshold ?= 2
-stop_loss_threshold ?= 4
+stop_loss_threshold ?= -5 # garbage value
 
 clean: $(strategy)
 	 rm -f data.csv
@@ -73,10 +73,5 @@ PAIRS:
 	python3 fetchMP.py $(symbol1) $(start_date) $(end_date) $(n)
 	python3 fetchMP.py $(symbol2) $(start_date) $(end_date) $(n)
 	g++ -std=c++20 -o MRP MRP.cpp
-	./MRP $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(start_date) $(end_date)
+	./MRP $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(stop_loss_threshold) $(start_date) $(end_date)
 
-PAIRS_WITH_STOP_LOSS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(stop_loss_threshold) $(start_date) $(end_date)

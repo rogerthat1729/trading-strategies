@@ -25,7 +25,6 @@ start_date = datetime.strptime(sd, "%d/%m/%Y").date()
 csv_start_date = start_date - relativedelta(days = n+7)
 
 
-
 df = stock_df(symbol=sym, from_date=csv_start_date,to_date=end_date, series="EQ")
 df = df[cols]
 df["DATE"] = pd.to_datetime(df["DATE"]).dt.strftime("%d/%m/%Y")
