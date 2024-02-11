@@ -4,6 +4,7 @@
 // #include <vector>
 // #include <string>
 // #include <ifstream>
+#include "LR.h"
 using namespace std;
 #define db double
 
@@ -305,9 +306,8 @@ void make_csv_LR(vector<string> &dates, vector<db> &prices, vector<int> &buy_sel
     pnl.close();
 }
 
-void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy)
+void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy, db& pnl)
 {
-
     dates.erase(dates.begin());
     prices.erase(prices.begin());
 
@@ -328,20 +328,19 @@ void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy)
             buy_sell[i] = 1;
             portfolio -= 1;
         }
-        if( i > 0){
-            final_amt[i] =  final_amt[i - 1];
-        }
-        final_amt[i] += buy_sell[i] * prices[i] ;
+        if(i>0)
+            final_amt[i] = final_amt[i-1];
+        final_amt[i] += buy_sell[i] * prices[i];
     }
-
+    pnl = final_amt.back() + portfolio * prices[sz - 1];
     make_csv_LR(dates, prices, buy_sell, portfolio, final_amt, 0);
 }
 
-int main(int argc, char *argv[])
+db workLR(int argc, vector<string> args)
 {
     // getting the arguments
-    int x = stoi(argv[1]);
-    db p = stod(argv[2]);
+    int x = stoi(args[1]);
+    db p = stod(args[2]);
 
     vector<vector<db>> theta = trainmodel();
 
@@ -402,14 +401,14 @@ int main(int argc, char *argv[])
     }
 
     vector<vector<db>> Y = matrixMultiply(X, theta);
-
     vector<db> yy;
     for (int i = 0; i < sz; i++)
-    {
         yy.push_back(Y[i][0]);
-    }
-
-    doLR(dates, closePrices, p, x, yy);
-
-    return 0;
+    db pnl = 0;
+    doLR(dates, closePrices, p, x, yy, pnl);
+    // cout << "Printing Y\n";
+    // printMat(Y);
+    // cout << endl;
+    return pnl;
 }
+

@@ -63,24 +63,26 @@ ADX:
 
 LINEAR_REGRESSION:
 	python3 fetchLR.py $(symbol) $(train_start_date) $(train_end_date) $(start_date) $(end_date) 
-	g++ -std=c++20 -o LR LR.cpp
+	g++ LR.cpp LRexecuter.cpp -o LR
 	./LR $(x) $(p)
 	rm -f LR
 	rm -f traindata.csv
 	# rm -f testdata.csv
 
 BEST_OF_ALL:
-	# python3 fetchLRforBest.py $(symbol) $(start_date) $(end_date)
+	python3 fetchLRforBest.py $(symbol) $(start_date) $(end_date)
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n)
-	# g++ --std=c++20 -o LR LR.cpp
-	# ./LR $(x) $(p)
+	g++ -c LR.cpp
 	g++ -c main.cpp
 	g++ -fopenmp -c best.cpp
-	g++ -fopenmp main.o best.o -o best
-	./best $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold)
+	g++ -fopenmp LR.o main.o best.o -o best
+	./best
 	rm -f best
 	rm -f best.o
 	rm -f main.o
+	rm -f LR.o
+	rm -f testdata.csv
+	rm -f traindata.csv
 
 PAIRS:
 	python3 fetchMP.py $(symbol1) $(start_date) $(end_date) $(n)
