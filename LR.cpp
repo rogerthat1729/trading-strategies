@@ -329,7 +329,10 @@ void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy)
             buy_sell[i] = 1;
             portfolio -= 1;
         }
-        final_amt[i] = buy_sell[i] * prices[i];
+        if( i > 0){
+            final_amt[i] =  final_amt[i - 1];
+        }
+        final_amt[i] += buy_sell[i] * prices[i] ;
     }
 
     make_csv(dates, prices, buy_sell, portfolio, final_amt, 0);
@@ -400,7 +403,7 @@ int main(int argc, char *argv[])
     }
 
     vector<vector<db>> Y = matrixMultiply(X, theta);
-    printMat(Y);
+
     vector<db> yy;
     for (int i = 0; i < sz; i++)
     {

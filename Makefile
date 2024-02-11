@@ -67,13 +67,13 @@ LINEAR_REGRESSION:
 	./LR $(x) $(p) $(train_start_date) $(train_end_date) $(start_date) $(end_date)
 	rm -f LR
 	rm -f traindata.csv
-	rm -f testdata.csv
+	# rm -f testdata.csv
 
 PAIRS:
-	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
-	python3 fetch.py $(symbol2) $(start_date) $(end_date) $(n)
-	g++ -std=c++20 -o main main.cpp
-	./main $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(start_date) $(end_date)
+	python3 fetchMP.py $(symbol1) $(start_date) $(end_date) $(n)
+	python3 fetchMP.py $(symbol2) $(start_date) $(end_date) $(n)
+	g++ -std=c++20 -o MRP MRP.cpp
+	./MRP $(strategy) $(symbol1) $(symbol2) $(x) $(n) $(threshold) $(start_date) $(end_date)
 
 PAIRS_WITH_STOP_LOSS:
 	python3 fetch.py $(symbol1) $(start_date) $(end_date) $(n)
