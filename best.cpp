@@ -19,7 +19,7 @@ int main()
     run["MACD"] = {"main", "MACD", "0", "5"};
     run["RSI"] = {"main", "RSI", "14", "5", "70", "30"};
     run["ADX"] = {"main", "ADX", "14", "5", "25"};
-    run["LR"] = {"LR", "7", "5"};
+    run["LR"] = {"LR", "5", "2"};
 
     map<int, string> index;
     index[0] = "BASIC";
