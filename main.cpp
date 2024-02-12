@@ -6,7 +6,7 @@
 // #include <string>
 // #include <ifstream>
 using namespace std;
-#define db double
+#define db long double
 
 // Remove cashflow floating point error
 // Match outputs in all cases
@@ -114,7 +114,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
     int sz = dates.size(), max_hold_days = 0, running_days = 0, earliest_index = 1e9;
     db running_denom = 0, SF = 0.5, AMA = prices[n], ER;
     queue<int> bought, sold;
-
+    
     // update runningdenom
     for (int i = 0; i < n; i++)
         running_denom += abs(prices[i] - prices[i + 1]);
@@ -159,7 +159,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             }
         }
 
-        if (prices[i] >= (1 + (p / 100.0)) * AMA && portfolio < x && buy_sell[i] != -1)
+        if (prices[i] >= (AMA + (p*AMA / 100.0)) && portfolio < x && buy_sell[i] != -1)
         {
             if (sold.size() > 0)
             {
@@ -179,7 +179,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             buy_sell[i] -= 1;
             portfolio++;
         }
-        else if (prices[i] <= (1 - (p / 100.0)) * AMA && portfolio > -x && buy_sell[i] != 1)
+        else if (prices[i] <= (AMA - (p*AMA / 100.0)) && portfolio > -x && buy_sell[i] != 1)
         {
             if (bought.size() > 0)
             {
@@ -260,8 +260,8 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
 
     for (int i = 1; i <= n; i++)
     {
-        avgGain += max(prices[i] - prices[i - 1], 0.0);
-        avgLoss += max(prices[i - 1] - prices[i], 0.0);
+        avgGain += max(prices[i] - prices[i - 1], (db)0.0);
+        avgLoss += max(prices[i - 1] - prices[i], (db)0.0);
     }
     avgGain /= n;
     avgLoss /= n;
@@ -289,8 +289,8 @@ void S1_4_2(vector<string> dates, vector<db> prices, int n, int x, db overbought
         // cout << avgGain << " " << avgLoss << " " << RS << " " << RSI << " " << final_amt[i] << endl;
         if (i < sz - 1)
         {
-            avgGain += (max(prices[i + 1] - prices[i], 0.0) - max(prices[i - n + 1] - prices[i - n], 0.0)) / n;
-            avgLoss += (max(prices[i] - prices[i + 1], 0.0) - max(prices[i - n] - prices[i - n + 1], 0.0)) / n;
+            avgGain += (max(prices[i + 1] - prices[i], (db)0.0) - max(prices[i - n + 1] - prices[i - n], (db)0.0)) / n;
+            avgLoss += (max(prices[i] - prices[i + 1], (db)0.0) - max(prices[i - n] - prices[i - n + 1], (db)0.0)) / n;
         }
         if (avgLoss != 0)
         {
@@ -308,9 +308,9 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
 {
     // In buy_sell, -1 means buy, 1 means sell
     int sz = dates.size();
-    db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prices[n - 1]), abs(lowPrices[n] - prices[n-1])));
+    db TR = max(highPrices[n] - lowPrices[n], max(abs(highPrices[n] - prices[n - 1]), abs(lowPrices[n] - prices[n - 1])));
 
-    db ATR = TR, DMplus = max(0.0, highPrices[n] - highPrices[n - 1]), DMminus = max(0.0, lowPrices[n] - lowPrices[n-1]), alpha = 2.0 / (n + 1);
+    db ATR = TR, DMplus = max((db)0.0, highPrices[n] - highPrices[n - 1]), DMminus = max((db)0.0, lowPrices[n] - lowPrices[n - 1]), alpha = 2.0 / (n + 1);
     db DIplus, DIminus, DX, ADX;
 
     if (ATR != 0)
@@ -324,7 +324,7 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
 
     if (DIplus + DIminus != 0)
     {
-        DX = 100.0*((DIplus - DIminus) / (DIplus + DIminus));
+        DX = 100.0 * ((DIplus - DIminus) / (DIplus + DIminus));
         ADX = DX;
     }
     else
@@ -351,13 +351,13 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
         {
             TR = max(highPrices[i + 1] - lowPrices[i + 1], max(abs(highPrices[i + 1] - prices[i]), abs(lowPrices[i + 1] - prices[i])));
             ATR += alpha * (TR - ATR);
-            DMplus = max(0.0, highPrices[i + 1] - highPrices[i]);
-            DMminus = max(0.0, lowPrices[i + 1] - lowPrices[i]);
+            DMplus = max((db)0.0, highPrices[i + 1] - highPrices[i]);
+            DMminus = max((db)0.0, lowPrices[i + 1] - lowPrices[i]);
             DIplus += alpha * ((DMplus / ATR) - DIplus);
             DIminus += alpha * (DMminus / ATR - DIminus);
             if (DIplus + DIminus != 0)
             {
-                DX = 100.0*(DIplus - DIminus) / (DIplus + DIminus);
+                DX = 100.0 * (DIplus - DIminus) / (DIplus + DIminus);
                 ADX += alpha * (DX - ADX);
             }
             else
@@ -423,15 +423,15 @@ db work(vector<string> args)
 
     int n = stoi(args[3]);
     int x = stoi(args[4]);
-    
-    if(from=="1")
+
+    if (from == "1")
     {
         vector<string> new_dates;
         vector<db> new_prices;
         vector<db> new_highPrices;
         vector<db> new_lowPrices;
-        //cout << strategy << "with value of n : " << n << endl;
-        for(int i = 50-n ; i < dates.size() ; ++i)
+        // cout << strategy << "with value of n : " << n << endl;
+        for (int i = 50 - n; i < dates.size(); ++i)
         {
             new_dates.push_back(dates[i]);
             new_prices.push_back(prices[i]);
@@ -447,7 +447,7 @@ db work(vector<string> args)
         lowPrices.clear();
         lowPrices = new_lowPrices;
     }
-    
+
     int sz = prices.size();
 
     vector<db> final_amt(sz, 0);

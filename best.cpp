@@ -3,7 +3,7 @@
 #include "main.h"
 #include "LR.h"
 using namespace std;
-#define db double
+#define db long double
 
 // Need to fix the data thing in BEST_OF_ALL
 
@@ -15,7 +15,7 @@ int main()
     map<string, vector<string>> run;
     run["BASIC"] = {"main", "BASIC", "7", "5"};
     run["DMA"] = {"main", "DMA", "50", "5", "2"};
-    run["DMA++"] = {"main", "DMA++", "14", "5", "5", "28", "2", "0.2"};
+    run["DMA++"] = {"main", "DMA++", "14", "5", "5", "28", "0.2", "2"};
     run["MACD"] = {"main", "MACD", "0", "5"};
     run["RSI"] = {"main", "RSI", "14", "5", "70", "30"};
     run["ADX"] = {"main", "ADX", "14", "5", "25"};

@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include "LR.h"
 using namespace std;
-#define db double
+#define db long double
 
 void printMat(vector<vector<db>> v)
 {
@@ -205,6 +205,7 @@ vector<vector<db>> trainmodel()
         X[i].push_back(openPrices[i + 1]);
         Y.push_back({closePrices[i + 1]});
     }
+    // printMat(matrixTranspose(X));
     vector<vector<db>> theta = matrixMultiply(matrixMultiply(inverse(matrixMultiply(matrixTranspose(X), X)), matrixTranspose(X)), Y);
     return theta;
 }
@@ -324,7 +325,7 @@ db workLR(vector<string> args)
         X[i].push_back(noOfTrades[i]);
         X[i].push_back(openPrices[i + 1]);
     }
-
+    // printMat(theta);
     vector<vector<db>> Y = matrixMultiply(X, theta);
     vector<db> yy;
     for (int i = 0; i < sz; i++)

@@ -3,7 +3,7 @@
 
 #include <bits/stdc++.h>
 using namespace std;
-#define db double
+#define db long double
 
 void printMat(vector<vector<db>> v);
 

@@ -23,7 +23,7 @@ threshold ?= 2
 stop_loss_threshold ?= -5 # garbage value
 
 clean: $(strategy)
-	@rm -f data.csv
+	# @rm -f data.csv
 
 BASIC:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
@@ -40,7 +40,7 @@ DMA:
 DMA++:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
 	g++ main.cpp executer.cpp -o executer
-	./executer $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2)
+	./executer $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c2) $(c1)
 	@rm -f executer
 
 MACD:
