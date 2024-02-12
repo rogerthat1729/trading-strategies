@@ -5,8 +5,6 @@
 using namespace std;
 #define db long double
 
-// Need to fix the data thing in BEST_OF_ALL
-
 int main()
 {
     db PnL = INT_MIN;

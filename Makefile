@@ -40,7 +40,7 @@ DMA:
 DMA++:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
 	g++ main.cpp executer.cpp -o executer
-	./executer $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c2) $(c1)
+	./executer $(strategy) $(n) $(x) $(p) $(max_hold_days) $(c1) $(c2)
 	@rm -f executer
 
 MACD:
