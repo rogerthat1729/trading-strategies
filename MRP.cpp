@@ -10,7 +10,7 @@ using namespace std;
 void make_csv(vector<string> &dates, vector<db> &spread, vector<int> &buy_sell1, int portfolio, vector<db> &final_amt, int n, vector<db> &prices, vector<db> &prices2)
 {
     int sz = spread.size();
-    ofstream file_1("daily_cashflow.csv"), file_2("order_statistics1.csv"), file_3("order_statistics2.csv"), pnl("final_pnl.txt");
+    ofstream file_1("daily_cashflow.csv"), file_2("order_statistics_1.csv"), file_3("order_statistics_2.csv"), pnl("final_pnl.txt");
 
     file_1 << "Date,Cashflow\n";
     file_2 << "Date,Order_dir,Quantity,Price\n";
