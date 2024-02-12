@@ -18,7 +18,7 @@ void make_csv(vector<string> &dates, vector<db> &spread, vector<int> &buy_sell1,
 
     for (int i = n - 1; i < sz; i++)
     {
-        file_1 << dates[i] << "," << final_amt[i] << "\n";
+        file_1 << dates[i] << "," << to_string(final_amt[i]) << "\n";
         if (buy_sell1[i] != 0)
         {
             file_2 << dates[i] << "," << (buy_sell1[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell1[i]) << "," << prices[i] << "\n";
@@ -36,7 +36,6 @@ void make_csv(vector<string> &dates, vector<db> &spread, vector<int> &buy_sell1,
 void MRP(vector<db> spread, vector<string> dates, int n, int x, db threshold, vector<db> &pri, vector<db> &pri2)
 {
     int sz = spread.size();
-
     db mean = 0.0;
     db sqmean = 0.0;
     db stdev = 0.0;

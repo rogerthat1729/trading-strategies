@@ -219,7 +219,7 @@ void make_csv_LR(vector<string> &dates, vector<db> &prices, vector<int> &buy_sel
 
     for (int i = n; i < sz; i++)
     {
-        file_1 << dates[i] << "," << final_amt[i] << "\n";
+        file_1 << dates[i] << "," << to_string(final_amt[i]) << "\n";
         if (buy_sell[i] != 0)
             file_2 << dates[i] << "," << (buy_sell[i] < 0 ? "BUY" : "SELL") << "," << abs(buy_sell[i]) << "," << prices[i] << "\n";
     }
