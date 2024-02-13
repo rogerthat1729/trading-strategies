@@ -1,4 +1,6 @@
-# trading-strategies
+# trading-strategies 
+###Vedant Talegaonkar - 2022CS11603
+###Priyanshu Agrawal - 2022CS11641
 
 # Optimisations
 
