@@ -114,7 +114,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
     int sz = dates.size(), max_hold_days = 0, running_days = 0, earliest_index = 1e9;
     db running_denom = 0, SF = 0.5, AMA = prices[n], ER;
     queue<int> bought, sold;
-    
+
     // update runningdenom
     for (int i = 0; i < n; i++)
         running_denom += abs(prices[i] - prices[i + 1]);
@@ -145,7 +145,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
                 else
                     earliest_index = 1e9;
                 portfolio--;
-                buy_sell[i] += 1;
+                buy_sell[i] = 1;
             }
             else if (sold.size() > 0)
             {
@@ -155,11 +155,11 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
                 else
                     earliest_index = 1e9;
                 portfolio++;
-                buy_sell[i] -= 1;
+                buy_sell[i] = -1;
             }
         }
 
-        if (prices[i] >= (AMA + (p*AMA / 100.0)) && portfolio < x && buy_sell[i] != -1)
+        if (prices[i] - AMA >= (p * AMA / 100.0) && portfolio < x && buy_sell[i] != -1)
         {
             if (sold.size() > 0)
             {
@@ -179,7 +179,7 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
             buy_sell[i] -= 1;
             portfolio++;
         }
-        else if (prices[i] <= (AMA - (p*AMA / 100.0)) && portfolio > -x && buy_sell[i] != 1)
+        else if (prices[i] - AMA <= -(p * AMA / 100.0) && portfolio > -x && buy_sell[i] != 1)
         {
             if (bought.size() > 0)
             {
@@ -201,19 +201,19 @@ void S1_3(vector<string> dates, vector<db> prices, int n, int x, db p, int mhd, 
         }
 
         final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
-
+        // cout << AMA << endl;
         // update runningdenom
         if (i < sz - 1)
         {
+            running_denom -= abs(prices[i - n] - prices[i - n + 1]);
+            running_denom += abs(prices[i] - prices[i + 1]);
             // Verify the meaning of skip when runningdenom = 0
             if (running_denom != 0)
             {
-                ER = (prices[i] - prices[i - n]) / running_denom;
+                ER = (prices[i + 1] - prices[i + 1 - n]) / running_denom;
                 SF = updateSF(SF, ER, c1, c2);
-                AMA += SF * (prices[i] - AMA);
+                AMA += SF * (prices[i + 1] - AMA);
             }
-            running_denom -= abs(prices[i - n] - prices[i - n + 1]);
-            running_denom += abs(prices[i] - prices[i + 1]);
         }
     }
 }
@@ -364,7 +364,7 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
             {
                 DX = 0;
                 // Doubtful for ADX - to take old one or set to threshold or smth else
-                
+
                 // ADX = adx_threshold;
                 // Or just don't update ADX
                 ADX += alpha * (DX - ADX);

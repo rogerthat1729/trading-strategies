@@ -33,4 +33,5 @@ idx_start = df[df["DATE"] == sd].index[0]
 idx_start -= n-1
 idx_start = max(0, idx_start)
 df1 = df.iloc[idx_start:]
+df1.drop_duplicates(subset=["DATE"], inplace=True)
 df1.to_csv(f"{sym}.csv")

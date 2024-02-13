@@ -13,7 +13,7 @@ int main()
     map<string, vector<string>> run;
     run["BASIC"] = {"main", "BASIC", "7", "5"};
     run["DMA"] = {"main", "DMA", "50", "5", "2"};
-    run["DMA++"] = {"main", "DMA++", "14", "5", "5", "28", "0.2", "2"};
+    run["DMA++"] = {"main", "DMA++", "14", "5", "5", "28", "2", "0.2"};
     run["MACD"] = {"main", "MACD", "0", "5"};
     run["RSI"] = {"main", "RSI", "14", "5", "70", "30"};
     run["ADX"] = {"main", "ADX", "14", "5", "25"};
@@ -51,7 +51,7 @@ int main()
             }
         }
     }
-    cout << "Best Strategy: " << best_strategy << endl;
+    // cout << "Best Strategy: " << best_strategy << endl;
     // cout << best_strategy << endl;
     vector<string> args = run[best_strategy];
     if (best_strategy == "LR")
