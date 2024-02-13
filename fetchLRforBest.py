@@ -35,7 +35,9 @@ def give_df(sym, sd, ed, cols):
     return df1
 
 df_train = give_df(sym, train_start_date, train_end_date, cols)
+df_train.drop_duplicates(subset="DATE", inplace=True)
 df_train.to_csv("traindata.csv")
 
 df_test = give_df(sym, start_date, end_date, cols)
+df_test.drop_duplicates(subset="DATE", inplace=True)
 df_test.to_csv("testdata.csv")

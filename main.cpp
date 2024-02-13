@@ -242,7 +242,6 @@ void S1_4_1(vector<string> dates, vector<db> prices, int x, vector<db> &final_am
             MACD = shortEWM - longEWM;
             signal += MACDalpha * (MACD - signal);
         }
-
         if (i > 0)
             final_amt[i] = final_amt[i - 1] + buy_sell[i] * prices[i];
         else

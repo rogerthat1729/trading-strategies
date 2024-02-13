@@ -43,7 +43,7 @@ int main()
         }
 #pragma omp critical
         {
-            // std::cout << index[i] << ": " << pnl << endl;
+            std::cout << index[i] << ": " << pnl << endl;
             if (pnl > PnL)
             {
                 PnL = pnl;
@@ -51,7 +51,7 @@ int main()
             }
         }
     }
-    // cout << "Best Strategy: " << best_strategy << endl;
+    cout << "Best Strategy: " << best_strategy << endl;
     // cout << best_strategy << endl;
     vector<string> args = run[best_strategy];
     if (best_strategy == "LR")

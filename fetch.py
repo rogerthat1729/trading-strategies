@@ -28,5 +28,6 @@ df = df.iloc[::-1].reset_index(drop=True)
 idx_start = df[df["DATE"] == sad].index[0]
 idx_start -= n
 idx_start = max(0, idx_start)
+df.drop_duplicates(subset="DATE", inplace=True)
 df1 = df.iloc[idx_start:]
 df1.to_csv("data.csv")
