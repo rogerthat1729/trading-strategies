@@ -5,7 +5,7 @@
 // #include <string>
 // #include <ifstream>
 using namespace std;
-#define db double
+#define db long double
 
 void make_csv(vector<string> &dates, vector<db> &spread, vector<int> &buy_sell1, int portfolio, vector<db> &final_amt, int n, vector<db> &prices, vector<db> &prices2)
 {
@@ -124,6 +124,64 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
         // getting all the numbers
         int sell_tracker_sz = sell_tracker.size();
         int buy_tracker_sz = buy_tracker.size();
+        
+        bool addlater_in_sell = false;
+        bool addlater_in_buy = false;
+
+
+        if (zscore > threshold && portfolio > -x)
+        { // SELL S1 and BUY S2
+            
+
+            if (buy_tracker_sz == 0)
+            {
+                // ADD THE TRADE LATER ON AFTER SQUARING OF THE CROSSED ONES.
+                // // overall portfolio is +ve that is only sell signals generated generate another
+                // sell_tracker.push_back({i, {mean, stdev}});
+                // buy_sell1[i] += 1;
+                // sell_tracker_sz += 1;
+                // portfolio -= 1;
+                addlater_in_sell = true; 
+                
+            }
+            else
+            {
+                
+                //we will sell the oldest one
+                buy_tracker.erase(buy_tracker.begin());
+                buy_tracker_sz -= 1;
+                buy_sell1[i] += 1;
+                portfolio -= 1;
+
+            }
+        }
+        else if (zscore < -threshold && portfolio < x)
+        { // BUY S1 and SELL S2
+            
+            if (sell_tracker_sz == 0)
+            {
+                // ADD THE TRADE LATER ON AFTER SQUARING OF THE CROSSED ONES.
+                // // overall portfolio is -ve that is only buy signals generated generate another
+                // buy_tracker.push_back({i, {mean, stdev}});
+                // buy_sell1[i] -= 1;
+                // buy_tracker_sz += 1;
+                // portfolio += 1;
+                 addlater_in_buy = true;
+
+                
+                
+            }
+            else
+            {
+                //we will buy the oldest one
+                sell_tracker.erase(sell_tracker.begin());
+                sell_tracker_sz -= 1;
+                buy_sell1[i] -= 1;
+                portfolio += 1;
+                
+            }
+        }
+
         int sell_crossed = 0;
         int buy_crossed = 0;
 
@@ -139,110 +197,6 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
             if (spread[i] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
             {
                 buy_crossed += 1;
-            }
-        }
-
-        if (zscore > threshold && portfolio > -x)
-        { // SELL S1 and BUY S2
-            
-
-            if (buy_tracker_sz == 0)
-            {
-                // overall portfolio is +ve that is only sell signals generated generate another
-                sell_tracker.push_back({i, {mean, stdev}});
-                buy_sell1[i] += 1;
-                sell_tracker_sz += 1;
-                portfolio -= 1;
-                
-                //check if today's trade crossed the stoploss threshold also. 
-                if ( zscore > stop_loss_threshold)
-                {
-                    sell_crossed += 1;
-                }
-            }
-            else
-            {
-                // there are buy signals present and we will now check if anything is crossed in buy. is so we cancel it out else sell the oldest.
-                if (buy_crossed > 0)
-                {
-                    // here we clear out all the crossed ones and include the sell in it only.
-                    buy_sell1[i] += buy_crossed; // overlapping today's sell with the crossed ones
-                    portfolio -=buy_crossed ;
-                    //updated the buy_tracker
-                    vector<pair<int, pair<db, db>>> temp;
-                    for (int i = 0; i < buy_tracker_sz; i++)
-                    {
-                        if (spread[i] < buy_tracker[i].second.first - stop_loss_threshold * buy_tracker[i].second.second)
-                        {
-                            // don't include these they crossed the stop_loss
-                        }else{
-                            temp.push_back(buy_tracker[i]);
-                        }
-                    }
-                    buy_tracker = temp;
-                    buy_crossed = 0;
-                    buy_tracker_sz = buy_tracker.size();
-                    
-                }
-                else
-                {
-                    // no buy crossed so we will sell the oldest one ASSUMPTION!!
-                    buy_tracker.erase(buy_tracker.begin());
-                    buy_tracker_sz -= 1;
-                    buy_sell1[i] += 1;
-                    portfolio -= 1;
-                }
-            }
-        }
-        else if (zscore < -threshold && portfolio < x)
-        { // BUY S1 and SELL S2
-            
-            if (sell_tracker_sz == 0)
-            {
-                // overall portfolio is -ve that is only buy signals generated generate another
-                buy_tracker.push_back({i, {mean, stdev}});
-                buy_sell1[i] -= 1;
-                buy_tracker_sz += 1;
-                portfolio += 1;
-                
-                //check if today's trade crossed the stoploss threshold also.
-                if ( zscore < -stop_loss_threshold)
-                {
-                    buy_crossed += 1;
-                }
-            }
-            else
-            {
-                // there are sell signals present and we will now check if anything is crossed in sell. is so we cancel it out else buy the oldest.
-                if (sell_crossed > 0)
-                {
-                    // here we clear out all the crossed ones and include the buy in it only.
-                    buy_sell1[i] -= sell_crossed; // overlapping today's buy with the crossed ones
-                    portfolio += sell_crossed;
-
-                    //updated the sell_tracker
-                    vector<pair<int, pair<db, db>>> temp;
-                    for (int i = 0; i < sell_tracker_sz; i++)
-                    {
-                        if (spread[i] > sell_tracker[i].second.first + stop_loss_threshold * sell_tracker[i].second.second)
-                        {
-                            
-                        }else{
-                            temp.push_back(sell_tracker[i]);
-                        }
-                    }
-                    sell_tracker = temp;
-                    sell_crossed = 0;
-                    sell_tracker_sz = sell_tracker.size();
-                }
-                else
-                {
-                    // no sell crossed so we will buy the oldest one
-                    sell_tracker.erase(sell_tracker.begin());
-                    sell_tracker_sz -= 1;
-                    buy_sell1[i] -= 1;
-                    portfolio += 1;
-                }
             }
         }
 
@@ -287,6 +241,24 @@ void MRP_stop(vector<db> spread, vector<string> dates, int n, int x, db threshol
                     sell_crossed = 0;
                     sell_tracker_sz = sell_tracker.size();
                 }
+
+        if(addlater_in_buy){
+             // overall portfolio is -ve that is only buy signals generated generate another
+                buy_tracker.push_back({i, {mean, stdev}});
+                buy_sell1[i] -= 1;
+                buy_tracker_sz += 1;
+                portfolio += 1;
+                addlater_in_buy = false;
+
+        }
+        if(addlater_in_sell){
+                // overall portfolio is +ve that is only sell signals generated generate another
+                sell_tracker.push_back({i, {mean, stdev}});
+                buy_sell1[i] += 1;
+                sell_tracker_sz += 1;
+                portfolio -= 1;
+                addlater_in_sell = false;
+        }
 
 
         if (i > 0)
