@@ -335,12 +335,12 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
     // cout << "TR ATR DMplus DMminus DIplus DIminus DX ADX\n";
     for (int i = n; i < sz; i++)
     {
-        if (ADX > adx_threshold && portfolio < x)
+        if (ADX > adx_threshold && portfolio < x && DX != 0)
         {
             portfolio++;
             buy_sell[i] = -1;
         }
-        else if (ADX < adx_threshold && portfolio > -x)
+        else if (ADX < adx_threshold && portfolio > -x && DX != 0)
         {
             portfolio--;
             buy_sell[i] = 1;
@@ -362,6 +362,9 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
             }
             else
             {
+                DX = 0;
+                // Doubtful for ADX - to take old one or set to threshold or smth else
+                ADX = adx_threshold;
                 continue;
             }
         }
