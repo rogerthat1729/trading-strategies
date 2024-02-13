@@ -23,7 +23,7 @@ threshold ?= 2
 stop_loss_threshold ?= -5 # garbage value
 
 clean: $(strategy)
-	# @rm -f data.csv
+	@rm -f data.csv
 
 BASIC:
 	python3 fetch.py $(symbol) $(start_date) $(end_date) $(n) 
