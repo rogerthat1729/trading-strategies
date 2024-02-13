@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 {
 
     string strategy = argv[1];
-    cout << strategy << endl;
+    // cout << strategy << endl;
     string sym1 = argv[2];
     string sym2 = argv[3];
     vector<string> dates;
