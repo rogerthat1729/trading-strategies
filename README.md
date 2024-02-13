@@ -34,7 +34,7 @@ Our inferences -
 
 We have explained my strategy with respect to what is happening to S1 for ease of understanding.
 
-# Our Understanding/ Assumptions  : 
+## Our Understanding/ Assumptions  : 
 1. Our strategy works/ we can make a resonable prediction when abs(zscore) less than abs(stop_loss_threshold). 
 2. Our "resonable prediction"/"motivation for the trade" is that abs(zscore) should return to 0. buy
 3. Say today's zscore is > threshold we can say that if we generate a sell signal then we can be in profit in the future. 
