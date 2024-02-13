@@ -243,6 +243,7 @@ void doLR(vector<string> dates, vector<db> prices, db p, int x, vector<db> yy, d
     int portfolio = 0;
     for (int i = 0; i < sz; i++)
     {
+        // cout << "Date: "<<dates[i] << " Actual : " << prices[i] << " Predict: " << yy[i] << endl;
         if (yy[i] > prices[i] * (1 + p / 100.0) && portfolio < x)
         {
             buy_sell[i] = -1;
