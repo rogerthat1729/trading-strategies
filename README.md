@@ -5,7 +5,7 @@
 1. In all momemtum-based strategies, wherever there was a need of the data for the past n days, we have performed optimisations on the complexity of the algorithm, which made it *O(n)* from *O(n^2)*.
 We stored either a running-variable/prefix-vector, which we updated at every step in constant time, thereby giving us *O(1)* complexity on every iteration/date.
 2. In Linear Regression, due to floating-point inconsistencies in the Gaussian elimination method to find inverse of a matrix, we used the Adjoint method to calculate the inverse. This minimised the floating-point errors, leading to good predictions, particularly for short durations.
-3. We observed that fetching data from *jugaad-data* library led to duplicates in the data collected. We took care of this in the python code, which was a crucial step to be taken. 
+3. **We observed that fetching data from *jugaad-data* library led to duplicates in the data collected. We took care of this in the python code, which was a crucial step to be taken.** 
 
 # Observations/Insights
 
