@@ -1,4 +1,4 @@
-# trading-strategies 
+# trading-strategies COP290 Assignment 1 Subtask 3
 ### Vedant Talegaonkar - 2022CS11603
 ### Priyanshu Agrawal - 2022CS11641
 
