@@ -364,8 +364,10 @@ void S1_4_3(vector<string> dates, vector<db> highPrices, vector<db> lowPrices, v
             {
                 DX = 0;
                 // Doubtful for ADX - to take old one or set to threshold or smth else
+                
                 ADX = adx_threshold;
-                continue;
+                // Or just don't update ADX
+                // ADX += alpha * (DX - ADX);
             }
         }
     }
